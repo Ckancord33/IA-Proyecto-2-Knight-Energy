@@ -1,0 +1,5 @@
+# Librerías requeridas para Knight Energy TUI
+
+# textual: Biblioteca para construir aplicaciones de interfaz de usuario de texto (TUI) hermosas y modernas en la terminal.
+# Proporciona soporte para CSS, diseño de cuadrícula/flexbox, soporte para mouse y navegación por teclado.
+textual>=0.50.0
