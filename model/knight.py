@@ -35,5 +35,13 @@ class Knight:
     def has_energy(self) -> bool:
         return self.energy > 0
 
+    def clone(self) -> "Knight":
+        """
+        Retorna una copia exacta del caballo en cuestion.
+        """
+        cloned = Knight(self.color, self.position, self.energy)
+        cloned.points = self.points
+        return cloned
+
     def __repr__(self) -> str:
         return f"Knight({self.color}, pos={self.position}, e={self.energy}, pts={self.points})"
