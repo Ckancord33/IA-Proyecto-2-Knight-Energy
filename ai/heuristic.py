@@ -1,3 +1,6 @@
 def funcion(state):
-    if(state):
-        return 1000
+    """
+    Función de utilidad primitiva mientras miguel define las heuristicas
+    """
+    return 1000
+    
