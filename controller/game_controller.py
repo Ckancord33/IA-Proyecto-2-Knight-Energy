@@ -13,10 +13,11 @@ class GameController:
     def __init__(
         self,
         state: State,
-        white_player_type: str = "human",  # "human" o "ai"
-        black_player_type: str = "ai",     # "human" o "ai"
+        white_player_type: str = "ai",  # "human" o "ai"
+        black_player_type: str = "human",     # "human" o "ai"
         white_depth: int = 3,
         black_depth: int = 3,
+        sleep_fn = None,
     ):
         self.state = state
         self.player_types = {
@@ -28,6 +29,7 @@ class GameController:
             "black": black_depth,
         }
         self.history: list[State] = []
+        self.sleep_fn = sleep_fn
         
         # Callbacks (Subscripciones) para comunicarse con la UI de forma reactiva
         self.on_state_changed = None  # Se ejecuta tras cada movimiento exitoso, pasándole el nuevo State
@@ -65,6 +67,8 @@ class GameController:
 
         # 3. Comprobar si le corresponde a la IA actuar de forma automática
         if current_type == "ai":
+            if self.sleep_fn:
+                self.sleep_fn()
             self.history.append(self.state.clone())
             depth = self.depths[current_color]
             

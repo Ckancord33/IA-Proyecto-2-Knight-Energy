@@ -43,7 +43,7 @@ export default {
         
         if (playBtn) {
             playBtn.addEventListener('click', () => {
-                navigate('/game');
+                navigate('/mode');
             });
         }
         

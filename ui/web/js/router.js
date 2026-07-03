@@ -1,11 +1,15 @@
 import Home from './pages/home.js';
 import Settings from './pages/settings.js';
 import Game from './pages/game.js';
+import ModeSelect from './pages/mode_select.js';
+import ConfigMatch from './pages/config_match.js';
 
 const routes = {
     '/': Home,
     '/settings': Settings,
-    '/game': Game
+    '/game': Game,
+    '/mode': ModeSelect,
+    '/config': ConfigMatch
 };
 
 let container = null;
