@@ -1,0 +1,532 @@
+/* 
+   Cyber-Tactical Monolith - Custom CSS Variables & Styling
+   Design Style: Brutalism & Modern Retro-Futurism
+*/
+
+:root {
+    /* Color Palette */
+    --color-surface: #131313;
+    --color-surface-dim: #131313;
+    --color-surface-bright: #393939;
+    --color-surface-container-lowest: #0e0e0e;
+    --color-surface-container-low: #1b1b1b;
+    --color-surface-container: #1f1f1f;
+    --color-surface-container-high: #2a2a2a;
+    --color-surface-container-highest: #353535;
+    
+    --color-on-surface: #e2e2e2;
+    --color-on-surface-variant: #cfc2d6;
+    --color-inverse-surface: #e2e2e2;
+    --color-inverse-on-surface: #303030;
+    
+    --color-outline: #988d9f;
+    --color-outline-variant: #4d4354;
+    
+    --color-surface-tint: #ddb7ff;
+    --color-primary: #ddb7ff; /* Electric Purple */
+    --color-on-primary: #490080;
+    --color-primary-container: #b76dff;
+    --color-on-primary-container: #400071;
+    --color-inverse-primary: #842bd2;
+    
+    --color-secondary: #c6c6c7; /* Stark White / Silver */
+    --color-on-secondary: #2f3131;
+    --color-secondary-container: #454747;
+    --color-on-secondary-container: #b4b5b5;
+    
+    --color-tertiary: #d1bcff;
+    --color-on-tertiary: #391e70;
+    --color-tertiary-container: #9c82d9;
+    --color-on-tertiary-container: #321669;
+    
+    --color-error: #ffb4ab;
+    --color-on-error: #690005;
+    --color-error-container: #93000a;
+    --color-on-error-container: #ffdad6;
+    
+    --color-background: #000000; /* True Black Void */
+    --color-on-background: #e2e2e2;
+    --color-surface-variant: #353535;
+
+    /* Spacing System (Multiples of 4px) */
+    --spacing-unit: 4px;
+    --spacing-gutter: 16px;
+    --spacing-margin-sm: 12px;
+    --spacing-margin-md: 24px;
+    --spacing-container-padding: 20px;
+    --spacing-grid-cell: 64px;
+}
+
+/* Global Reset & Base Styling */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border-radius: 0 !important; /* Sharp corners rule */
+}
+
+html, body {
+    height: 100%;
+    background-color: var(--color-background);
+    color: var(--color-on-background);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    overflow: hidden;
+}
+
+/* Selection colors */
+::selection {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+}
+
+/* Frame Layout & Skeleton */
+.mainframe-body {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    position: relative;
+    user-select: none;
+}
+
+#matrix-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Scanline and CRT Phosphor Glow Effect */
+.scanline {
+    width: 100%;
+    height: 3px;
+    background: rgba(221, 183, 255, 0.05);
+    position: absolute;
+    z-index: 999;
+    top: 0;
+    pointer-events: none;
+    animation: scanline 12s linear infinite;
+}
+
+@keyframes scanline {
+    0% { top: 0; }
+    100% { top: 100%; }
+}
+
+.glow-text {
+    text-shadow: 0 0 8px rgba(221, 183, 255, 0.6);
+}
+
+.glow-text-white {
+    color: #ffffff !important;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.4);
+}
+
+.glow-text-purple {
+    color: var(--color-primary) !important;
+    text-shadow: 0 0 10px rgba(221, 183, 255, 0.8), 0 0 20px rgba(221, 183, 255, 0.4);
+}
+
+.glow-border {
+    box-shadow: 0 0 10px rgba(221, 183, 255, 0.2);
+}
+
+.cursor-blink {
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}
+
+/* Application Header */
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 0 var(--spacing-margin-md);
+    height: 64px;
+    border-bottom: 1px solid var(--color-outline-variant);
+    background-color: var(--color-surface);
+    position: relative;
+    z-index: 40;
+}
+
+.header-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+}
+
+.header-logo .material-symbols-outlined {
+    font-size: 24px;
+}
+
+.header-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--color-primary);
+    letter-spacing: 0.15em;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-gutter);
+}
+
+.header-btn {
+    background: none;
+    border: none;
+    color: var(--color-on-surface-variant);
+    padding: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+}
+
+.header-btn:hover {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+}
+
+.header-btn:active {
+    transform: scale(0.95);
+}
+
+/* Dynamic Core Content Area */
+.app-main {
+    flex: 1;
+    overflow-y: auto;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+}
+
+/* Footer & Keyboard Shortcuts */
+.app-footer {
+    height: 48px;
+    border-top: 1px solid var(--color-outline-variant);
+    background-color: var(--color-surface-container-lowest);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--spacing-margin-md);
+    font-size: 12px;
+    color: var(--color-secondary);
+    z-index: 40;
+}
+
+.shortcut-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-margin-md);
+}
+
+.shortcut-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+}
+
+.shortcut-key {
+    background-color: var(--color-surface-container-highest);
+    padding: 2px 6px;
+    border: 1px solid var(--color-outline);
+    color: var(--color-on-surface);
+}
+
+.shortcut-prompt {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 12px;
+}
+
+/* Typography Utility Classes */
+.uppercase {
+    text-transform: uppercase;
+}
+
+.font-bold {
+    font-weight: 700;
+}
+
+.tracking-wide {
+    letter-spacing: 0.1em;
+}
+
+.tracking-widest {
+    letter-spacing: 0.3em;
+}
+
+.text-primary {
+    color: var(--color-primary);
+}
+
+.text-secondary {
+    color: var(--color-secondary);
+}
+
+.text-on-surface {
+    color: var(--color-on-surface);
+}
+
+.text-on-surface-variant {
+    color: var(--color-on-surface-variant);
+}
+
+/* Tactical GUI Framework Components */
+.tactical-container {
+    position: relative;
+    border: 1px solid var(--color-outline-variant);
+    background-color: var(--color-surface-container-low);
+    padding: 32px;
+    width: 100%;
+}
+
+/* Corners for primary frames */
+.tactical-container .corner {
+    position: absolute;
+    color: var(--color-primary);
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1;
+    width: 12px;
+    height: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.tactical-container .corner.tl { top: -8px; left: -6px; }
+.tactical-container .corner.tr { top: -8px; right: -6px; }
+.tactical-container .corner.bl { bottom: -8px; left: -6px; }
+.tactical-container .corner.br { bottom: -8px; right: -6px; }
+
+/* Tactical Mainframe Buttons */
+.tactical-btn {
+    background: transparent;
+    border: 1px solid var(--color-primary);
+    color: var(--color-primary);
+    padding: 20px var(--spacing-margin-md);
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    outline: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    overflow: hidden;
+}
+
+.tactical-btn .btn-overlay {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(255, 255, 255, 0.08);
+    transform: translateY(100%);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tactical-btn:hover {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    box-shadow: 0 0 12px rgba(221, 183, 255, 0.5);
+}
+
+.tactical-btn:hover .btn-overlay {
+    transform: translateY(0);
+}
+
+.tactical-btn:active {
+    box-shadow: 0 0 20px #ffffff;
+    transform: scale(0.98);
+}
+
+/* Home Screen Page View Styling */
+.home-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: 40px;
+}
+
+.hero-section {
+    width: 100%;
+    max-width: 900px;
+    margin-bottom: 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid var(--color-outline-variant);
+    padding-bottom: 32px;
+}
+
+.hero-main {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    margin-bottom: 12px;
+}
+
+.hero-icon {
+    font-size: 80px;
+    font-weight: 900;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero-icon.left {
+    animation: pulse-slow-left 4s ease-in-out infinite alternate;
+}
+
+.hero-icon.right {
+    animation: pulse-slow-right 4s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-slow-left {
+    0% { opacity: 0.85; transform: scale(0.95); }
+    100% { opacity: 1; transform: scale(1.05); }
+}
+
+@keyframes pulse-slow-right {
+    0% { opacity: 0.85; transform: rotate(12deg) scale(0.95); }
+    100% { opacity: 1; transform: rotate(12deg) scale(1.05); }
+}
+
+.hero-text-container {
+    text-align: center;
+}
+
+.hero-title {
+    font-size: 48px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--color-primary);
+    line-height: 1.1;
+    text-transform: uppercase;
+}
+
+.hero-subtitle {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+    letter-spacing: 0.4em;
+    color: var(--color-secondary);
+    margin-top: 8px;
+    text-transform: uppercase;
+}
+
+.home-menu-box {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.menu-header-tag {
+    position: absolute;
+    top: -10px;
+    left: 24px;
+    background-color: var(--color-background);
+    padding: 0 16px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    color: var(--color-primary);
+}
+
+.home-menu-box .menu-options {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Placeholder Page Views Styling */
+.placeholder-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: 40px;
+}
+
+.terminal-monitor {
+    width: 100%;
+    max-width: 720px;
+    border: 1px solid var(--color-outline-variant);
+    background-color: var(--color-surface-container-lowest);
+    padding: 40px;
+    margin-bottom: 32px;
+}
+
+.terminal-header {
+    border-bottom: 1px solid var(--color-outline-variant);
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.terminal-text {
+    font-size: 16px;
+    line-height: 26px;
+    color: var(--color-on-surface-variant);
+}
+
+.terminal-log-line {
+    margin-bottom: 8px;
+}
+
+.terminal-back-btn {
+    border: 1px solid var(--color-outline);
+    color: var(--color-on-surface);
+    padding: 12px 24px;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.terminal-back-btn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background-color: rgba(221, 183, 255, 0.05);
+}
+
+.terminal-back-btn:active {
+    transform: scale(0.98);
+}
