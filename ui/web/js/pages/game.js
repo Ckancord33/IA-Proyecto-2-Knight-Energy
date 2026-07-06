@@ -143,8 +143,8 @@ export default {
             difficulty: 'normal',
             playerColor: 'black',
             boardSize: 8,
-            energies: [1, 3, 5],
-            points: [2, 5, 8]
+            energies: [2, 3, 4, 5],
+            points: [2, 3, 4, 5, 6, 8, 9]
         };
 
         const size = config.boardSize;
@@ -177,8 +177,8 @@ export default {
             difficulty: 'normal',
             playerColor: 'black',
             boardSize: 8,
-            energies: [1, 3, 5],
-            points: [2, 5, 8]
+            energies: [2, 3, 4, 5],
+            points: [2, 3, 4, 5, 6, 8, 9]
         };
         const size = config.boardSize;
         const mid = Math.floor(size / 2);
@@ -645,8 +645,8 @@ export default {
             difficulty: 'normal',
             playerColor: 'black',
             boardSize: 8,
-            energies: [1, 3, 5],
-            points: [2, 5, 8]
+            energies: [2, 3, 4, 5],
+            points: [2, 3, 4, 5, 6, 8, 9]
         };
 
         if (window.eel) {

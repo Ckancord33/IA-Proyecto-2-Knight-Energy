@@ -83,7 +83,7 @@ export default {
                             </div>
                             <div class="prompt-input-wrapper">
                                 <span class="prompt-arrow text-primary">&gt;</span>
-                                <input type="text" class="prompt-input" id="energy-array-input" value="1, 3, 5" placeholder="Valores separados por comas">
+                                <input type="text" class="prompt-input" id="energy-array-input" value="2, 3, 4, 5" placeholder="Valores separados por comas">
                             </div>
                         </div>
 
@@ -95,7 +95,7 @@ export default {
                             </div>
                             <div class="prompt-input-wrapper">
                                 <span class="prompt-arrow text-primary">&gt;</span>
-                                <input type="text" class="prompt-input" id="points-array-input" value="2, 5, 8" placeholder="Valores separados por comas">
+                                <input type="text" class="prompt-input" id="points-array-input" value="2, 3, 4, 5, 6, 8, 9" placeholder="Valores separados por comas">
                             </div>
                         </div>
 
@@ -203,8 +203,8 @@ export default {
                     difficulty: selectedDifficulty,
                     playerColor: selectedColor,
                     boardSize: boardSize,
-                    energies: energies.length > 0 ? energies : [1, 3, 5],
-                    points: points.length > 0 ? points : [2, 5, 8]
+                    energies: energies.length > 0 ? energies : [2, 3, 4, 5],
+                    points: points.length > 0 ? points : [2, 3, 4, 5, 6, 8, 9]
                 };
 
                 console.log(`Iniciando juego con Dificultad: ${selectedDifficulty}, Color: ${selectedColor}, Tablero: ${boardSize}x${boardSize}, Energias: [${energies}], Puntos: [${points}]`);
