@@ -1,12 +1,12 @@
 import Home from './pages/home.js';
-import Settings from './pages/settings.js';
+import Instructions from './pages/instructions.js';
 import Game from './pages/game.js';
 import ModeSelect from './pages/mode_select.js';
 import ConfigMatch from './pages/config_match.js';
 
 const routes = {
     '/': Home,
-    '/settings': Settings,
+    '/instructions': Instructions,
     '/game': Game,
     '/mode': ModeSelect,
     '/config': ConfigMatch
@@ -36,7 +36,7 @@ export function navigate(path) {
 function updateHeaderActiveState(path) {
     const settingsBtn = document.getElementById('settings-view-btn');
     if (settingsBtn) {
-        if (path === '/settings') {
+        if (path === '/instructions') {
             settingsBtn.classList.add('text-primary');
             settingsBtn.style.textShadow = '0 0 8px rgba(221, 183, 255, 0.8)';
         } else {

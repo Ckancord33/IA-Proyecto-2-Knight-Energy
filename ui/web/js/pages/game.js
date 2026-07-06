@@ -602,7 +602,7 @@ export default {
                             <span class="legend-text uppercase">VACÍA</span>
                         </div>
                         <div class="legend-item">
-                            <span class="legend-box legend-point">5</span>
+                            <span class="legend-box legend-point"><span class="material-symbols-outlined" style="font-size: 12px; text-shadow: 0 0 4px rgba(74, 222, 128, 0.5);">star</span></span>
                             <span class="legend-text uppercase">PUNTOS</span>
                         </div>
                         <div class="legend-item">

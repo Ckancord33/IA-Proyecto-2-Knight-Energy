@@ -27,6 +27,11 @@ export default {
                             <span>INICIAR PROTOCOLO JUGAR</span>
                             <div class="btn-overlay"></div>
                         </button>
+                        <button class="tactical-btn" id="instructions-btn">
+                            <span class="material-symbols-outlined">menu_book</span>
+                            <span>INSTRUCCIONES DE PROTOCOLO</span>
+                            <div class="btn-overlay"></div>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -38,11 +43,17 @@ export default {
         AudioManager.playTitle();
 
         const playBtn = document.getElementById('play-btn');
-        
         if (playBtn) {
             playBtn.addEventListener('click', () => {
                 AudioManager.fadeTitle(1500);
                 navigate('/mode');
+            });
+        }
+
+        const instructionsBtn = document.getElementById('instructions-btn');
+        if (instructionsBtn) {
+            instructionsBtn.addEventListener('click', () => {
+                navigate('/instructions');
             });
         }
         

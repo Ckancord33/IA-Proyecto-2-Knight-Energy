@@ -1294,8 +1294,9 @@ body {
 }
 
 .legend-point {
-    border: 1px dashed var(--color-outline);
-    color: var(--color-secondary);
+    border: 1px solid rgba(74, 222, 128, 0.25);
+    background-color: rgba(74, 222, 128, 0.03);
+    color: #4ade80;
 }
 
 .legend-energy {
