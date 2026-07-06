@@ -42,9 +42,9 @@ def ping():
     return "pong"
 
 @eel.expose
-def start_game_backend(board_size, difficulty, player_color, energies, points, game_mode='pvc'):
+def start_game_backend(board_size, difficulty, player_color, energies, points, game_mode='pvc', white_heuristic='complex', black_heuristic='complex'):
     global current_controller
-    print(f"Backend: Starting game. Board size: {board_size}, Difficulty: {difficulty}, Player Color: {player_color}, Mode: {game_mode}")
+    print(f"Backend: Starting game. Board size: {board_size}, Difficulty: {difficulty}, Player Color: {player_color}, Mode: {game_mode}, WhiteHeur: {white_heuristic}, BlackHeur: {black_heuristic}")
     
     # 1. Generate layout from user arrays
     layout = generate_initial_layout(n=board_size, points_val=points, energies_val=energies)
@@ -81,6 +81,8 @@ def start_game_backend(board_size, difficulty, player_color, energies, points, g
         black_player_type=black_player,
         white_depth=depth,
         black_depth=depth,
+        white_heuristic=white_heuristic,
+        black_heuristic=black_heuristic,
         sleep_fn=lambda: eel.sleep(1.0)
     )
     

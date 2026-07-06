@@ -30,6 +30,39 @@ export default {
             opt2Text = 'NEGRAS (M2: Blancas)';
         }
 
+        let heuristicHTML = '';
+        if (mode === 'pvc') {
+            heuristicHTML = `
+                <!-- Section: Heuristic Select -->
+                <div class="config-section">
+                    <div class="config-label uppercase font-bold tracking-wide">HEURÍSTICA DE LA IA</div>
+                    <div class="tactical-chips-container">
+                        <button class="tactical-chip heur-select-chip active" data-heur="complex">Compleja (Avanzada)</button>
+                        <button class="tactical-chip heur-select-chip" data-heur="simple">Simple (Básica)</button>
+                    </div>
+                </div>
+            `;
+        } else if (mode === 'cvc') {
+            heuristicHTML = `
+                <!-- Section: Heuristic Select for Machine 1 -->
+                <div class="config-section">
+                    <div class="config-label uppercase font-bold tracking-wide">HEURÍSTICA MÁQUINA 1 (W)</div>
+                    <div class="tactical-chips-container">
+                        <button class="tactical-chip heur1-select-chip active" data-heur="complex">Compleja (Avanzada)</button>
+                        <button class="tactical-chip heur1-select-chip" data-heur="simple">Simple (Básica)</button>
+                    </div>
+                </div>
+                <!-- Section: Heuristic Select for Machine 2 -->
+                <div class="config-section">
+                    <div class="config-label uppercase font-bold tracking-wide">HEURÍSTICA MÁQUINA 2 (B)</div>
+                    <div class="tactical-chips-container">
+                        <button class="tactical-chip heur2-select-chip active" data-heur="complex">Compleja (Avanzada)</button>
+                        <button class="tactical-chip heur2-select-chip" data-heur="simple">Simple (Básica)</button>
+                    </div>
+                </div>
+            `;
+        }
+
         return `
             <div class="home-page">
                 <!-- Back Navigation Button on Top Left -->
@@ -68,6 +101,8 @@ export default {
                             <button class="tactical-chip color-select-chip active" data-color="black">${opt2Text}</button>
                         </div>
                     </div>
+
+                    ${heuristicHTML}
 
                     <!-- Section 2: Parameters Toggle Button -->
                     <div class="config-section center-align">
@@ -138,6 +173,8 @@ export default {
     },
 
     init(navigate) {
+        const mode = window.gameMode || 'pvc';
+
         // Back to Mode Selection Page
         const backBtn = document.getElementById('config-back-btn');
         if (backBtn) {
@@ -167,6 +204,40 @@ export default {
                 chip.classList.add('active');
                 selectedColor = chip.getAttribute('data-color');
                 console.log(`Color del jugador seleccionado: ${selectedColor}`);
+            });
+        });
+
+        // Heuristic selection logic
+        let selectedHeur1 = 'complex';
+        let selectedHeur2 = 'complex';
+
+        const heurIAChips = document.querySelectorAll('.heur-select-chip');
+        heurIAChips.forEach(chip => {
+            chip.addEventListener('click', (e) => {
+                heurIAChips.forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                selectedHeur1 = chip.getAttribute('data-heur');
+                console.log(`Heurística IA seleccionada: ${selectedHeur1}`);
+            });
+        });
+
+        const heurM1Chips = document.querySelectorAll('.heur1-select-chip');
+        heurM1Chips.forEach(chip => {
+            chip.addEventListener('click', (e) => {
+                heurM1Chips.forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                selectedHeur1 = chip.getAttribute('data-heur');
+                console.log(`Heurística M1 seleccionada: ${selectedHeur1}`);
+            });
+        });
+
+        const heurM2Chips = document.querySelectorAll('.heur2-select-chip');
+        heurM2Chips.forEach(chip => {
+            chip.addEventListener('click', (e) => {
+                heurM2Chips.forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                selectedHeur2 = chip.getAttribute('data-heur');
+                console.log(`Heurística M2 seleccionada: ${selectedHeur2}`);
             });
         });
 
@@ -220,17 +291,33 @@ export default {
                 const energies = energyInput.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
                 const points = pointsInput.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
 
+                let whiteHeur = 'complex';
+                let blackHeur = 'complex';
+
+                if (mode === 'pvc') {
+                    if (selectedColor === 'white') {
+                        blackHeur = selectedHeur1;
+                    } else {
+                        whiteHeur = selectedHeur1;
+                    }
+                } else if (mode === 'cvc') {
+                    whiteHeur = selectedHeur1;
+                    blackHeur = selectedHeur2;
+                }
+
                 // Save config to shared state
                 window.gameState = {
-                    gameMode: window.gameMode || 'pvc',
+                    gameMode: mode,
                     difficulty: selectedDifficulty,
                     playerColor: selectedColor,
                     boardSize: boardSize,
                     energies: energies.length > 0 ? energies : [2, 3, 4, 5],
-                    points: points.length > 0 ? points : [2, 3, 4, 5, 6, 8, 9]
+                    points: points.length > 0 ? points : [2, 3, 4, 5, 6, 8, 9],
+                    whiteHeur: whiteHeur,
+                    blackHeur: blackHeur
                 };
 
-                console.log(`Iniciando juego con Dificultad: ${selectedDifficulty}, Color: ${selectedColor}, Tablero: ${boardSize}x${boardSize}, Energias: [${energies}], Puntos: [${points}]`);
+                console.log(`Iniciando juego con Dificultad: ${selectedDifficulty}, Color: ${selectedColor}, Tablero: ${boardSize}x${boardSize}, Energias: [${energies}], Puntos: [${points}], WhiteHeur: ${whiteHeur}, BlackHeur: ${blackHeur}`);
 
                 // Navigate to game board
                 navigate('/game');

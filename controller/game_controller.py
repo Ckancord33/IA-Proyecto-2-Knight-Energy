@@ -17,6 +17,8 @@ class GameController:
         black_player_type: str = "human",     # "human" o "ai"
         white_depth: int = 3,
         black_depth: int = 3,
+        white_heuristic: str = "complex",
+        black_heuristic: str = "complex",
         sleep_fn = None,
     ):
         self.state = state
@@ -27,6 +29,10 @@ class GameController:
         self.depths = {
             "white": white_depth,
             "black": black_depth,
+        }
+        self.heuristics = {
+            "white": white_heuristic,
+            "black": black_heuristic,
         }
         self.history: list[State] = []
         self.sleep_fn = sleep_fn
@@ -73,7 +79,8 @@ class GameController:
             depth = self.depths[current_color]
             
             # Ejecutar el movimiento de la IA directamente en el controlador
-            best_move = get_best_move(self.state, depth)
+            h_type = self.heuristics[current_color]
+            best_move = get_best_move(self.state, depth, heuristic_type=h_type)
             if best_move is None:
                 raise ValueError(f"No se encontró ningún movimiento posible para la IA en el turno de {self.state.turn}")
                 

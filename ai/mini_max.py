@@ -1,5 +1,5 @@
 import math
-from ai.heuristic import heuristic as heuristic
+from ai.heuristic import heuristica1, heuristica2
 import model.game as game
 
 def is_leaf(state, depth, max_depth):
@@ -19,7 +19,7 @@ def get_children_states(state):
     moves = game.legal_moves(state, state.turn) # si hay energia calcula movimientos legales
     return [game.apply_move(state, move) for move in moves]
 
-def get_best_move(initial_state, max_depth):
+def get_best_move(initial_state, max_depth, heuristic_type='complex'):
     """
     Ejecuta el algoritmo minimax con poda alfa-beta sobre el estado inicial y retorna la 
     posición del movimiento recomendado para el jugador que tiene el turno.
@@ -35,7 +35,10 @@ def get_best_move(initial_state, max_depth):
         # parar si se topa con una hoja
         if is_leaf(state, depth, max_depth):
             # Evalua la heurística desde la perspectiva del jugador original osea el active_color
-            return heuristic(state, active_color), state
+            if heuristic_type == 'simple':
+                return heuristica2(state, active_color), state
+            else:
+                return heuristica1(state, active_color), state
 
         children = get_children_states(state)
         best_state = None
