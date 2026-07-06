@@ -1,5 +1,5 @@
-from ai.heuristic import funcion as heuristic
-from model.node import Node
+import math
+from ai.heuristic import heuristic as heuristic
 import model.game as game
 
 def is_leaf(state, depth, max_depth):
@@ -21,7 +21,7 @@ def get_children_states(state):
 
 def get_best_move(initial_state, max_depth):
     """
-    Ejecuta el algoritmo minimax sobre el estado inicial y retorna la 
+    Ejecuta el algoritmo minimax con poda alfa-beta sobre el estado inicial y retorna la 
     posición del movimiento recomendado para el jugador que tiene el turno.
     """
     if game.is_terminal(initial_state):
@@ -29,52 +29,64 @@ def get_best_move(initial_state, max_depth):
     if game.must_skip(initial_state, initial_state.turn):
         return None
 
-    # Construimos y resolvemos el árbol minimax igual que en minimax()
-    root = Node(initial_state, 'MAX', 0)
-    stack = [root]
-    nodes_array = []
-    
-    while stack:
-        current_node = stack.pop()
-        nodes_array.append(current_node)
-        
-        if not is_leaf(current_node.state, current_node.depth, max_depth):
-            next_states = get_children_states(current_node.state)
-            next_type = 'MIN' if current_node.node_type == 'MAX' else 'MAX'
-            
-            for state in next_states:
-                child = Node(state, next_type, current_node.depth + 1, current_node)
-                stack.append(child)
-        else:
-            current_node.utility = heuristic(current_node.state)
-            
-    nodes_array.sort(key=lambda node: node.depth, reverse=True)
-    
-    for node in nodes_array:
-        if node.parent is not None:
-            if node.parent.node_type == 'MAX':
-                if node.utility > node.parent.utility:
-                    node.parent.utility = node.utility
-            elif node.parent.node_type == 'MIN':
-                if node.utility < node.parent.utility:
-                    node.parent.utility = node.utility
+    active_color = initial_state.turn
 
-    # Encontrar el nodo hijo directo (depth 1) que coincida con la utilidad elegida en root
-    best_child = None
-    for node in nodes_array:
-        if node.parent is root and node.utility == root.utility:
-            best_child = node
-            break
+    def minimax_ab(state, depth, alpha, beta, is_max_turn):
+        # parar si se topa con una hoja
+        if is_leaf(state, depth, max_depth):
+            # Evalua la heurística desde la perspectiva del jugador original osea el active_color
+            return heuristic(state, active_color), state
 
-    if best_child is None:
-        # Resguardo de seguridad
-        children = [n for n in nodes_array if n.parent is root]
-        if children:
-            best_child = children[0]
+        children = get_children_states(state)
+        best_state = None
+
+        if is_max_turn:
+            max_eval = -math.inf
+            for child in children:
+                # Llamada recursiva asumiendo el turno del oponente
+                eval_val, _ = minimax_ab(child, depth + 1, alpha, beta, False)
+                
+                # Actualizar el mejor escenario para si misma (max)
+                if eval_val > max_eval:
+                    max_eval = eval_val
+                    best_state = child
+                
+                # Poda de los hijos de max:
+                # Si el valor de este nodo eval_val es mayor o igual que beta podamos
+                if eval_val >= beta:
+                    break
+                    
+                # Actualizamos el valor alfa asegurado por max
+                alpha = max(alpha, eval_val)
+                
+            return max_eval, best_state
+            
         else:
-            return None
+            min_eval = math.inf
+            for child in children:
+                # Llamada recursiva asumiendo nuestro turno (max)
+                eval_val, _ = minimax_ab(child, depth + 1, alpha, beta, True)
+                
+                # Actualizar el mejor escenario para min (el que mas perjudica al agente)
+                if eval_val < min_eval:
+                    min_eval = eval_val
+                    best_state = child
+                
+                # Poda de los hijos de min
+                # Si el valor de este nodo eval_val es menor o igual que alfa, podamos
+                if eval_val <= alpha:
+                    break
+                    
+                # Actualizamos el valor beta asegurado por min
+                beta = min(beta, eval_val)
+                
+            return min_eval, best_state
+
+    # La primera llamada es para el turno actual del agente buscando maximizar
+    _, best_next_state = minimax_ab(initial_state, 0, -math.inf, math.inf, True)
+
+    if best_next_state is None:
+        return None
 
     # Extraemos la posición a la que se movió el caballo activo
-    active_color = initial_state.turn
-    return best_child.state.knights[active_color].position
-
+    return best_next_state.knights[active_color].position
