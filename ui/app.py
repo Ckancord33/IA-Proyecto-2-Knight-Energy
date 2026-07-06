@@ -120,11 +120,11 @@ def start_gui():
     # Start Eel in dedicated app window mode (Chrome app or Edge app)
     try:
         print("Launching GUI in Chrome App Mode...")
-        eel.start('index.html', mode='chrome', size=(1280, 768), port=8686, cmdline_args=['--autoplay-policy=no-user-gesture-required'])
+        eel.start('index.html', mode='chrome', size=(1280, 768), port=8686)
     except EnvironmentError:
         try:
             print("Chrome not found. Launching GUI in Microsoft Edge App Mode...")
-            eel.start('index.html', mode='edge', size=(1280, 768), port=8686, cmdline_args=['--autoplay-policy=no-user-gesture-required'])
+            eel.start('index.html', mode='edge', size=(1280, 768), port=8686)
         except EnvironmentError:
             print("App mode not supported. Falling back to default system browser...")
             eel.start('index.html', mode='default', size=(1280, 768), port=8686)
