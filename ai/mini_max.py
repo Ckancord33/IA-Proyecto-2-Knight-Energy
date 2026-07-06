@@ -50,7 +50,7 @@ def get_best_move(initial_state, max_depth, heuristic_type='complex'):
                 eval_val, _ = minimax_ab(child, depth + 1, alpha, beta, False)
                 
                 # Actualizar el mejor escenario para si misma (max)
-                if eval_val > max_eval:
+                if eval_val > max_eval or best_state is None:
                     max_eval = eval_val
                     best_state = child
                 
@@ -71,7 +71,7 @@ def get_best_move(initial_state, max_depth, heuristic_type='complex'):
                 eval_val, _ = minimax_ab(child, depth + 1, alpha, beta, True)
                 
                 # Actualizar el mejor escenario para min (el que mas perjudica al agente)
-                if eval_val < min_eval:
+                if eval_val < min_eval or best_state is None:
                     min_eval = eval_val
                     best_state = child
                 
