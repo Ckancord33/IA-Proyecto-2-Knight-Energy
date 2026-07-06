@@ -27,12 +27,6 @@ export default {
                             <span>INICIAR PROTOCOLO JUGAR</span>
                             <div class="btn-overlay"></div>
                         </button>
-                        
-                        <button class="tactical-btn" id="settings-btn">
-                            <span class="material-symbols-outlined">settings</span>
-                            <span>CONFIGURACIONES</span>
-                            <div class="btn-overlay"></div>
-                        </button>
                     </div>
                 </div>
             </div>
@@ -44,7 +38,6 @@ export default {
         AudioManager.playTitle();
 
         const playBtn = document.getElementById('play-btn');
-        const settingsBtn = document.getElementById('settings-btn');
         
         if (playBtn) {
             playBtn.addEventListener('click', () => {
@@ -53,10 +46,5 @@ export default {
             });
         }
         
-        if (settingsBtn) {
-            settingsBtn.addEventListener('click', () => {
-                navigate('/settings');
-            });
-        }
     }
 };
