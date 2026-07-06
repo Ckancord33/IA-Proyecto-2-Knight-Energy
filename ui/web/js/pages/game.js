@@ -27,6 +27,12 @@ function showGameOverOverlay(result, state) {
     // Remove any existing overlay
     document.getElementById('game-over-overlay')?.remove();
 
+    if (result === 'win') {
+        AudioManager.playSFX('sfx_win');
+    } else if (result === 'lose') {
+        AudioManager.playSFX('sfx_lose');
+    }
+
     const isWin  = result === 'win';
     const isDraw = result === 'draw';
 
@@ -292,9 +298,11 @@ export default {
 
             if (playerPointsDiff === -3 && playerEnergyDiff === 0) {
                 this.logs.push(`[${this.getLogTime()}] JUGADOR PERDIÓ TURNO (FALTA DE ENERGÍA): -3 PUNTOS`);
+                AudioManager.playSFX('sfx_penalty');
             }
             if (machinePointsDiff === -3 && machineEnergyDiff === 0) {
                 this.logs.push(`[${this.getLogTime()}] MÁQUINA PERDIÓ TURNO (FALTA DE ENERGÍA): -3 PUNTOS`);
+                AudioManager.playSFX('sfx_penalty');
             }
         }
 
@@ -341,16 +349,19 @@ export default {
         }
 
         if (moveAnim) {
+            AudioManager.playSFX('sfx_move');
             animateKnightJump(moveAnim.type, moveAnim.start, moveAnim.end, playerColor, this.state.currentTurn, () => {
                 if (moveAnim.capture && moveAnim.capture.type === 'energy') {
                     const targetId = moveAnim.type === 'player' ? 'player-energy-val' : 'machine-energy-val';
                     const newVal   = moveAnim.type === 'player' ? newPlayerEnergy : newMachineEnergy;
+                    AudioManager.playSFX('sfx_energy');
                     triggerEnergyEffects(moveAnim.type, moveAnim.end, moveAnim.capture.value, () => {
                         setStatText(targetId, newVal);
                     });
                 } else if (moveAnim.capture && moveAnim.capture.type === 'point') {
                     const targetId = moveAnim.type === 'player' ? 'player-points-val' : 'machine-points-val';
                     const newVal   = moveAnim.type === 'player' ? newPlayerPoints : newMachinePoints;
+                    AudioManager.playSFX('sfx_point');
                     triggerPointEffects(moveAnim.type, moveAnim.end, moveAnim.capture.value, () => {
                         setStatText(targetId, newVal);
                     });
@@ -548,14 +559,6 @@ export default {
                         </div>
                     </div>
 
-                    <!-- Undo Match Action Button -->
-                    <div class="sidebar-actions-container" style="margin-top: 4px;">
-                        <button class="tactical-btn" id="game-undo-btn" style="width: 100%; border-style: dashed;">
-                            <span class="material-symbols-outlined" style="font-size: 16px;">undo</span>
-                            <span>DESHACER PROTOCOLO</span>
-                            <div class="btn-overlay"></div>
-                        </button>
-                    </div>
 
                     <!-- Terminal System Logs -->
                     <div class="system-logs-container">
@@ -671,16 +674,6 @@ export default {
                 }
             });
         });
-
-        // Undo button click listener
-        const undoBtn = document.getElementById('game-undo-btn');
-        if (undoBtn) {
-            undoBtn.addEventListener('click', () => {
-                if (window.eel) {
-                    window.eel.undo_move_backend()();
-                }
-            });
-        }
 
         // Auto Scroll logs console
         const consoleBox = document.getElementById('log-console-box');
