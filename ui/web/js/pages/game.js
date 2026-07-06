@@ -1,3 +1,113 @@
+import { animateKnightJump, triggerEnergyEffects, triggerPointEffects } from '../animations.js';
+import { AudioManager } from '../audio.js';
+
+/**
+ * Updates only the visible numeric text inside a stat element (e.g. player-energy-val),
+ * preserving any child elements like the bolt icon.
+ */
+function setStatText(elementId, value) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    // Replace the first text node only, leaving child spans (icons) intact
+    for (const node of el.childNodes) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            node.textContent = ` ${value} `;
+            return;
+        }
+    }
+    // Fallback: prepend a text node if none found
+    el.insertBefore(document.createTextNode(` ${value} `), el.firstChild);
+}
+
+/**
+ * Renders a full-screen game-over overlay with cyberpunk styling.
+ * result: 'win' | 'lose' | 'draw'
+ */
+function showGameOverOverlay(result, state) {
+    // Remove any existing overlay
+    document.getElementById('game-over-overlay')?.remove();
+
+    const isWin  = result === 'win';
+    const isDraw = result === 'draw';
+
+    const headline   = isWin ? 'GANASTE' : isDraw ? 'EMPATE' : 'PERDISTE';
+    const subline    = isWin
+        ? 'MISIÓN COMPLETADA · OBJETIVO ELIMINADO'
+        : isDraw
+        ? 'EQUILIBRIO TÁCTICO · SIN VENCEDOR'
+        : 'SISTEMA COMPROMETIDO · OBJETIVO PERDIDO';
+    const glowColor  = isWin ? '#4ade80' : isDraw ? '#ffeb3b' : '#f87171';
+    const borderColor = isWin ? 'rgba(74,222,128,0.4)' : isDraw ? 'rgba(255,235,59,0.4)' : 'rgba(248,113,113,0.4)';
+    const icon       = isWin ? '♚' : isDraw ? '⚖' : '♟';
+
+    const playerPts  = state?.playerPoints  ?? 0;
+    const machinePts = state?.machinePoints ?? 0;
+    const playerNrg  = state?.playerEnergy  ?? 0;
+    const machineNrg = state?.machineEnergy ?? 0;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'game-over-overlay';
+    overlay.innerHTML = `
+        <div class="go-backdrop"></div>
+        <div class="go-panel" style="--go-color:${glowColor}; --go-border:${borderColor};">
+            <div class="go-corner go-tl">+</div>
+            <div class="go-corner go-tr">+</div>
+            <div class="go-corner go-bl">+</div>
+            <div class="go-corner go-br">+</div>
+
+            <div class="go-icon" style="color:${glowColor}; text-shadow:0 0 30px ${glowColor};">${icon}</div>
+            <div class="go-tag">// PARTIDA_FINALIZADA</div>
+            <h1 class="go-headline" style="color:${glowColor}; text-shadow:0 0 40px ${glowColor}, 0 0 80px ${glowColor};">${headline}</h1>
+            <p class="go-subline">${subline}</p>
+
+            <div class="go-divider" style="background:${glowColor};"></div>
+
+            <div class="go-stats">
+                <div class="go-stat-block">
+                    <span class="go-stat-label">JUGADOR</span>
+                    <span class="go-stat-value" style="color:${glowColor};">${playerPts} <span style="font-size:14px;opacity:0.6;">pts</span></span>
+                    <span class="go-stat-sub">${playerNrg} energía restante</span>
+                </div>
+                <div class="go-stat-sep">vs</div>
+                <div class="go-stat-block">
+                    <span class="go-stat-label">MÁQUINA</span>
+                    <span class="go-stat-value" style="color:var(--color-primary);">${machinePts} <span style="font-size:14px;opacity:0.6;">pts</span></span>
+                    <span class="go-stat-sub">${machineNrg} energía restante</span>
+                </div>
+            </div>
+
+            <div class="go-divider" style="background:${glowColor};"></div>
+
+            <div class="go-actions">
+                <button class="go-btn go-btn-primary" id="go-replay-btn" style="--go-color:${glowColor}; border-color:${glowColor}; color:${glowColor};">
+                    <span class="material-symbols-outlined" style="font-size:18px;">home</span>
+                    MENÚ PRINCIPAL
+                </button>
+            </div>
+
+            <div class="go-scanline"></div>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    // Animate in
+    requestAnimationFrame(() => {
+        overlay.classList.add('go-visible');
+    });
+
+    // Replay button → go back to menu
+    document.getElementById('go-replay-btn').addEventListener('click', () => {
+        overlay.classList.remove('go-visible');
+        setTimeout(() => {
+            overlay.remove();
+            // Navigate to the main menu
+            if (window.navigate) window.navigate('/');
+            else if (window.navigateTo) window.navigateTo('/');
+        }, 400);
+    });
+}
+
 // Track current active page instance to allow global callbacks from Eel to resolve safely
 let activePageInstance = null;
 
@@ -119,6 +229,9 @@ export default {
             boardCells[key] = { type: 'energy', value: val };
         }
 
+        // Track movement animations
+        let moveAnim = null;
+
         // Compile logs dynamically based on movement changes
         if (this.state) {
             const cols = ['A','B','C','D','E','F','G','H','I','J','K','L'];
@@ -131,10 +244,19 @@ export default {
                 
                 // Did player land on resource
                 const prevCell = this.state.boardCells[`${p1Pos.r},${p1Pos.c}`];
+                let capture = null;
                 if (prevCell) {
+                    capture = { type: prevCell.type, value: prevCell.value };
                     if (prevCell.type === 'point') this.logs.push(`[${this.getLogTime()}] JUGADOR CAPTURÓ +${prevCell.value} PUNTOS`);
                     if (prevCell.type === 'energy') this.logs.push(`[${this.getLogTime()}] JUGADOR RECARGÓ +${prevCell.value} ENERGÍA`);
                 }
+
+                moveAnim = {
+                    type: 'player',
+                    start: { r: prevP1.r, c: prevP1.c },
+                    end: { r: p1Pos.r, c: p1Pos.c },
+                    capture: capture
+                };
             }
             
             // Check if machine moved
@@ -144,10 +266,19 @@ export default {
                 this.logs.push(`[${this.getLogTime()}] MOVIMIENTO MÁQUINA A ${targetLabel}`);
                 
                 const prevCell = this.state.boardCells[`${p2Pos.r},${p2Pos.c}`];
+                let capture = null;
                 if (prevCell) {
+                    capture = { type: prevCell.type, value: prevCell.value };
                     if (prevCell.type === 'point') this.logs.push(`[${this.getLogTime()}] MÁQUINA CAPTURÓ +${prevCell.value} PUNTOS`);
                     if (prevCell.type === 'energy') this.logs.push(`[${this.getLogTime()}] MÁQUINA RECARGÓ +${prevCell.value} ENERGÍA`);
                 }
+
+                moveAnim = {
+                    type: 'machine',
+                    start: { r: prevP2.r, c: prevP2.c },
+                    end: { r: p2Pos.r, c: p2Pos.c },
+                    capture: capture
+                };
             }
 
             // Check if a turn skip occurred (must skip energy lack)
@@ -169,32 +300,77 @@ export default {
 
         const isPlayerTurn = pythonState.turn === playerColor;
 
+        // Save old stats BEFORE updating state (for delayed display update)
+        const prevPlayerEnergy = this.state?.playerEnergy ?? null;
+        const prevPlayerPoints = this.state?.playerPoints ?? null;
+        const prevMachineEnergy = this.state?.machineEnergy ?? null;
+        const prevMachinePoints = this.state?.machinePoints ?? null;
+
+        const newPlayerEnergy = isPlayerWhite ? pythonState.knights.white.energy : pythonState.knights.black.energy;
+        const newPlayerPoints = isPlayerWhite ? pythonState.knights.white.points : pythonState.knights.black.points;
+        const newMachineEnergy = isPlayerWhite ? pythonState.knights.black.energy : pythonState.knights.white.energy;
+        const newMachinePoints = isPlayerWhite ? pythonState.knights.black.points : pythonState.knights.white.points;
+
         this.state = {
             size: pythonState.n,
             playerColor: playerColor,
             p1Pos: p1Pos,
             p2Pos: p2Pos,
             currentTurn: isPlayerTurn ? 'player' : 'machine',
-            playerPoints: isPlayerWhite ? pythonState.knights.white.points : pythonState.knights.black.points,
-            playerEnergy: isPlayerWhite ? pythonState.knights.white.energy : pythonState.knights.black.energy,
-            machinePoints: isPlayerWhite ? pythonState.knights.black.points : pythonState.knights.white.points,
-            machineEnergy: isPlayerWhite ? pythonState.knights.black.energy : pythonState.knights.white.energy,
+            playerPoints: newPlayerPoints,
+            playerEnergy: newPlayerEnergy,
+            machinePoints: newMachinePoints,
+            machineEnergy: newMachineEnergy,
             maxEnergy: 15,
             boardCells: boardCells,
             validMoves: pythonValidMoves || []
         };
 
         this.refreshUI();
+
+        // If a capture happened, freeze the stat display to old value — it will update after animation
+        if (moveAnim && moveAnim.capture) {
+            const c = moveAnim.capture;
+            if (moveAnim.type === 'player') {
+                if (c.type === 'energy' && prevPlayerEnergy !== null) setStatText('player-energy-val', prevPlayerEnergy);
+                if (c.type === 'point'  && prevPlayerPoints !== null) setStatText('player-points-val', prevPlayerPoints);
+            } else {
+                if (c.type === 'energy' && prevMachineEnergy !== null) setStatText('machine-energy-val', prevMachineEnergy);
+                if (c.type === 'point'  && prevMachinePoints !== null) setStatText('machine-points-val', prevMachinePoints);
+            }
+        }
+
+        if (moveAnim) {
+            animateKnightJump(moveAnim.type, moveAnim.start, moveAnim.end, playerColor, this.state.currentTurn, () => {
+                if (moveAnim.capture && moveAnim.capture.type === 'energy') {
+                    const targetId = moveAnim.type === 'player' ? 'player-energy-val' : 'machine-energy-val';
+                    const newVal   = moveAnim.type === 'player' ? newPlayerEnergy : newMachineEnergy;
+                    triggerEnergyEffects(moveAnim.type, moveAnim.end, moveAnim.capture.value, () => {
+                        setStatText(targetId, newVal);
+                    });
+                } else if (moveAnim.capture && moveAnim.capture.type === 'point') {
+                    const targetId = moveAnim.type === 'player' ? 'player-points-val' : 'machine-points-val';
+                    const newVal   = moveAnim.type === 'player' ? newPlayerPoints : newMachinePoints;
+                    triggerPointEffects(moveAnim.type, moveAnim.end, moveAnim.capture.value, () => {
+                        setStatText(targetId, newVal);
+                    });
+                }
+            });
+        }
     },
 
     handleGameOver(winnerColor) {
         const playerColor = this.state?.playerColor || 'black';
+        let result = 'draw';
         let msg = '';
         if (!winnerColor) {
+            result = 'draw';
             msg = '¡EL JUEGO TERMINÓ EN EMPATE!';
         } else if (winnerColor === playerColor) {
+            result = 'win';
             msg = '¡VICTORIA! HAS GANADO LA PARTIDA';
         } else {
+            result = 'lose';
             msg = '¡DERROTA! LA MÁQUINA HA GANADO LA PARTIDA';
         }
         
@@ -202,8 +378,8 @@ export default {
         this.refreshUI();
         
         setTimeout(() => {
-            alert(msg);
-        }, 200);
+            showGameOverOverlay(result, this.state);
+        }, 400);
     },
 
     getHTML() {
@@ -236,7 +412,7 @@ export default {
                     const colorClass = isPlayerWhite ? 'player' : 'machine';
                     const activeTurnClass = this.state.currentTurn === 'player' ? 'active-turn' : '';
                     cellsHTML += `
-                        <div class="board-cell cell-knight ${colorClass} ${activeTurnClass}">
+                        <div class="board-cell cell-knight ${colorClass} ${activeTurnClass}" data-r="${r}" data-c="${c}">
                             <span>♘</span>
                         </div>
                     `;
@@ -244,32 +420,31 @@ export default {
                     const colorClass = isPlayerWhite ? 'machine' : 'player';
                     const activeTurnClass = this.state.currentTurn === 'machine' ? 'active-turn' : '';
                     cellsHTML += `
-                        <div class="board-cell cell-knight ${colorClass} ${activeTurnClass}">
+                        <div class="board-cell cell-knight ${colorClass} ${activeTurnClass}" data-r="${r}" data-c="${c}">
                             <span>♘</span>
                         </div>
                     `;
-                } else if (isValidMove) {
-                    cellsHTML += `
-                        <div class="board-cell cell-valid-move" data-r="${r}" data-c="${c}"></div>
-                    `;
                 } else {
                     const cellData = this.state.boardCells[`${r},${c}`] || { type: 'empty', value: 0 };
+                    const validClass = isValidMove ? 'cell-valid-move' : '';
+
                     if (cellData.type === 'point') {
                         cellsHTML += `
-                            <div class="board-cell cell-point">
-                                <span class="point-number">${cellData.value}</span>
+                            <div class="board-cell cell-point ${validClass}" data-r="${r}" data-c="${c}">
+                                <span class="material-symbols-outlined pt-icon">star</span>
+                                <span class="pt-amount">+${cellData.value}</span>
                             </div>
                         `;
                     } else if (cellData.type === 'energy') {
                         cellsHTML += `
-                            <div class="board-cell cell-energy">
+                            <div class="board-cell cell-energy ${validClass}" data-r="${r}" data-c="${c}">
                                 <span class="material-symbols-outlined nrg-icon">bolt</span>
                                 <span class="nrg-amount">+${cellData.value}</span>
                             </div>
                         `;
                     } else {
                         cellsHTML += `
-                            <div class="board-cell cell-empty">
+                            <div class="board-cell cell-empty ${validClass}" data-r="${r}" data-c="${c}">
                                 <span class="dot-marker">.</span>
                             </div>
                         `;
@@ -277,16 +452,6 @@ export default {
                 }
             }
         }
-
-        const getEnergyBarHTML = (current, max) => {
-            let bar = '<div class="energy-segmented-bar">';
-            for (let i = 0; i < max; i += 2) {
-                const isFilled = i < current;
-                bar += `<div class="energy-segment ${isFilled ? 'filled' : 'empty'}"></div>`;
-            }
-            bar += '</div>';
-            return bar;
-        };
 
         const isActivePlayer = this.state.currentTurn === 'player';
         const turnOperatorLabel = isActivePlayer ? 'JUGADOR' : 'MÁQUINA';
@@ -325,13 +490,18 @@ export default {
                         <div class="operator-stats">
                             <div class="stat-row">
                                 <span class="stat-label">PUNTOS</span>
-                                <span class="stat-val ${playerPointsGlowClass}">${playerPointsStr}</span>
+                                <span id="player-points-val" class="stat-val ${playerPointsGlowClass}" style="display: flex; align-items: center;">
+                                    ${playerPointsStr}
+                                    <span class="material-symbols-outlined" style="font-size: 14px; margin-left: 4px; color: #4ade80; text-shadow: 0 0 4px rgba(74, 222, 128, 0.5);">star</span>
+                                </span>
                             </div>
-                            <div class="stat-row">
+                            <div class="stat-row" style="align-items: center;">
                                 <span class="stat-label">ENERGÍA</span>
-                                <span class="stat-val text-primary">${this.state.playerEnergy} / ${this.state.maxEnergy}</span>
+                                <span id="player-energy-val" class="stat-val text-primary" style="display: flex; align-items: center;">
+                                    ${this.state.playerEnergy}
+                                    <span class="material-symbols-outlined" style="font-size: 16px; margin-left: 4px; text-shadow: 0 0 4px rgba(221, 183, 255, 0.5);">bolt</span>
+                                </span>
                             </div>
-                            ${getEnergyBarHTML(this.state.playerEnergy, this.state.maxEnergy)}
                         </div>
                     </div>
 
@@ -347,13 +517,18 @@ export default {
                         <div class="operator-stats">
                             <div class="stat-row">
                                 <span class="stat-label">PUNTOS</span>
-                                <span class="stat-val ${machinePointsGlowClass}">${machinePointsStr}</span>
+                                <span id="machine-points-val" class="stat-val ${machinePointsGlowClass}" style="display: flex; align-items: center;">
+                                    ${machinePointsStr}
+                                    <span class="material-symbols-outlined" style="font-size: 14px; margin-left: 4px; color: #4ade80; text-shadow: 0 0 4px rgba(74, 222, 128, 0.5);">star</span>
+                                </span>
                             </div>
-                            <div class="stat-row">
+                            <div class="stat-row" style="align-items: center;">
                                 <span class="stat-label">ENERGÍA</span>
-                                <span class="stat-val text-primary">${this.state.machineEnergy} / ${this.state.maxEnergy}</span>
+                                <span id="machine-energy-val" class="stat-val text-primary" style="display: flex; align-items: center;">
+                                    ${this.state.machineEnergy}
+                                    <span class="material-symbols-outlined" style="font-size: 16px; margin-left: 4px; text-shadow: 0 0 4px rgba(221, 183, 255, 0.5);">bolt</span>
+                                </span>
                             </div>
-                            ${getEnergyBarHTML(this.state.machineEnergy, this.state.maxEnergy)}
                         </div>
                     </div>
 
@@ -456,6 +631,9 @@ export default {
     init(navigate) {
         this.navigate = navigate;
         activePageInstance = this;
+        
+        // Start in-game music
+        AudioManager.playGame();
         
         // Reset state so each entry does a clean startup
         this.state = null;

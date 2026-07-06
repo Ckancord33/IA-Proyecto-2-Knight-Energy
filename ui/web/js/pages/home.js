@@ -1,3 +1,5 @@
+import { AudioManager } from '../audio.js';
+
 export default {
     render() {
         return `
@@ -38,11 +40,15 @@ export default {
     },
     
     init(navigate) {
+        // Play title music when home page is initialized
+        AudioManager.playTitle();
+
         const playBtn = document.getElementById('play-btn');
         const settingsBtn = document.getElementById('settings-btn');
         
         if (playBtn) {
             playBtn.addEventListener('click', () => {
+                AudioManager.fadeTitle(1500);
                 navigate('/mode');
             });
         }
