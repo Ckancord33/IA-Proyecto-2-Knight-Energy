@@ -36,15 +36,50 @@ function showGameOverOverlay(result, state) {
     const isWin  = result === 'win';
     const isDraw = result === 'draw';
 
-    const headline   = isWin ? 'GANASTE' : isDraw ? 'EMPATE' : 'PERDISTE';
-    const subline    = isWin
-        ? 'MISIÓN COMPLETADA · OBJETIVO ELIMINADO'
-        : isDraw
-        ? 'EQUILIBRIO TÁCTICO · SIN VENCEDOR'
-        : 'SISTEMA COMPROMETIDO · OBJETIVO PERDIDO';
-    const glowColor  = isWin ? '#4ade80' : isDraw ? '#ffeb3b' : '#f87171';
-    const borderColor = isWin ? 'rgba(74,222,128,0.4)' : isDraw ? 'rgba(255,235,59,0.4)' : 'rgba(248,113,113,0.4)';
-    const icon       = isWin ? '♚' : isDraw ? '⚖' : '♟';
+    const mode = state?.gameMode || 'pvc';
+    let p1Label = 'JUGADOR';
+    let p2Label = 'MÁQUINA';
+    if (mode === 'pvp') {
+        p1Label = 'JUGADOR 1';
+        p2Label = 'JUGADOR 2';
+    } else if (mode === 'cvc') {
+        p1Label = 'MÁQUINA 1';
+        p2Label = 'MÁQUINA 2';
+    }
+
+    let headline = '';
+    let subline = '';
+    let glowColor = '';
+    let borderColor = '';
+    let icon = '';
+
+    if (isDraw) {
+        headline = 'EMPATE';
+        subline = 'EQUILIBRIO TÁCTICO · SIN VENCEDOR';
+        glowColor = '#ffeb3b';
+        borderColor = 'rgba(255,235,59,0.4)';
+        icon = '⚖';
+    } else {
+        if (mode === 'pvp') {
+            headline = isWin ? 'VICTORIA J1' : 'VICTORIA J2';
+            subline = isWin ? 'EL JUGADOR 1 HA CONQUISTADO EL TABLERO' : 'EL JUGADOR 2 HA CONQUISTADO EL TABLERO';
+            glowColor = isWin ? '#ffffff' : 'var(--color-primary)';
+            borderColor = isWin ? 'rgba(255,255,255,0.4)' : 'rgba(221,183,255,0.4)';
+            icon = '♚';
+        } else if (mode === 'cvc') {
+            headline = isWin ? 'GANÓ IA 1' : 'GANÓ IA 2';
+            subline = isWin ? 'SIMULACIÓN COMPLETADA · GANADOR MÁQUINA 1' : 'SIMULACIÓN COMPLETADA · GANADOR MÁQUINA 2';
+            glowColor = 'var(--color-primary)';
+            borderColor = 'rgba(221,183,255,0.4)';
+            icon = '⚙';
+        } else {
+            headline = isWin ? 'GANASTE' : 'PERDISTE';
+            subline = isWin ? 'MISIÓN COMPLETADA · OBJETIVO ELIMINADO' : 'SISTEMA COMPROMETIDO · OBJETIVO PERDIDO';
+            glowColor = isWin ? '#4ade80' : '#f87171';
+            borderColor = isWin ? 'rgba(74,222,128,0.4)' : 'rgba(248,113,113,0.4)';
+            icon = isWin ? '♚' : '♟';
+        }
+    }
 
     const playerPts  = state?.playerPoints  ?? 0;
     const machinePts = state?.machinePoints ?? 0;
@@ -70,13 +105,13 @@ function showGameOverOverlay(result, state) {
 
             <div class="go-stats">
                 <div class="go-stat-block">
-                    <span class="go-stat-label">JUGADOR</span>
+                    <span class="go-stat-label">${p1Label}</span>
                     <span class="go-stat-value" style="color:${glowColor};">${playerPts} <span style="font-size:14px;opacity:0.6;">pts</span></span>
                     <span class="go-stat-sub">${playerNrg} energía restante</span>
                 </div>
                 <div class="go-stat-sep">vs</div>
                 <div class="go-stat-block">
-                    <span class="go-stat-label">MÁQUINA</span>
+                    <span class="go-stat-label">${p2Label}</span>
                     <span class="go-stat-value" style="color:var(--color-primary);">${machinePts} <span style="font-size:14px;opacity:0.6;">pts</span></span>
                     <span class="go-stat-sub">${machineNrg} energía restante</span>
                 </div>
@@ -140,6 +175,7 @@ export default {
 
     initGameState() {
         const config = window.gameState || {
+            gameMode: 'pvc',
             difficulty: 'normal',
             playerColor: 'black',
             boardSize: 8,
@@ -152,6 +188,7 @@ export default {
 
         this.state = {
             size: size,
+            gameMode: config.gameMode || 'pvc',
             difficulty: config.difficulty,
             playerColor: config.playerColor || 'black',
             p1Pos: { r: mid, c: mid - 1 },     
@@ -174,6 +211,7 @@ export default {
 
     initLocalMockState() {
         const config = window.gameState || {
+            gameMode: 'pvc',
             difficulty: 'normal',
             playerColor: 'black',
             boardSize: 8,
@@ -190,6 +228,7 @@ export default {
 
         this.state = {
             size: size,
+            gameMode: config.gameMode || 'pvc',
             playerColor: config.playerColor,
             p1Pos: { r: mid, c: mid - 1 },
             p2Pos: { r: mid - 1, c: mid + 1 },
@@ -216,6 +255,7 @@ export default {
     handleStateUpdate(pythonState, pythonValidMoves) {
         const playerColor = this.state?.playerColor || pythonState.playerColor || window.gameState?.playerColor || 'black';
         const isPlayerWhite = playerColor === 'white';
+        const mode = this.state?.gameMode || window.gameState?.gameMode || 'pvc';
         
         // Pos indices array [r, c] from Python to {r, c}
         const p1Pos = isPlayerWhite 
@@ -238,6 +278,16 @@ export default {
         // Track movement animations
         let moveAnim = null;
 
+        let p1LogName = 'JUGADOR';
+        let p2LogName = 'MÁQUINA';
+        if (mode === 'pvp') {
+            p1LogName = 'JUGADOR 1';
+            p2LogName = 'JUGADOR 2';
+        } else if (mode === 'cvc') {
+            p1LogName = 'MÁQUINA 1';
+            p2LogName = 'MÁQUINA 2';
+        }
+
         // Compile logs dynamically based on movement changes
         if (this.state) {
             const cols = ['A','B','C','D','E','F','G','H','I','J','K','L'];
@@ -246,15 +296,15 @@ export default {
             const prevP1 = this.state.p1Pos;
             if (prevP1 && (prevP1.r !== p1Pos.r || prevP1.c !== p1Pos.c)) {
                 const targetLabel = `${cols[p1Pos.c]}${pythonState.n - p1Pos.r}`;
-                this.logs.push(`[${this.getLogTime()}] MOVIMIENTO JUGADOR A ${targetLabel}`);
+                this.logs.push(`[${this.getLogTime()}] MOVIMIENTO ${p1LogName} A ${targetLabel}`);
                 
                 // Did player land on resource
                 const prevCell = this.state.boardCells[`${p1Pos.r},${p1Pos.c}`];
                 let capture = null;
                 if (prevCell) {
                     capture = { type: prevCell.type, value: prevCell.value };
-                    if (prevCell.type === 'point') this.logs.push(`[${this.getLogTime()}] JUGADOR CAPTURÓ +${prevCell.value} PUNTOS`);
-                    if (prevCell.type === 'energy') this.logs.push(`[${this.getLogTime()}] JUGADOR RECARGÓ +${prevCell.value} ENERGÍA`);
+                    if (prevCell.type === 'point') this.logs.push(`[${this.getLogTime()}] ${p1LogName} CAPTURÓ +${prevCell.value} PUNTOS`);
+                    if (prevCell.type === 'energy') this.logs.push(`[${this.getLogTime()}] ${p1LogName} RECARGÓ +${prevCell.value} ENERGÍA`);
                 }
 
                 moveAnim = {
@@ -269,14 +319,14 @@ export default {
             const prevP2 = this.state.p2Pos;
             if (prevP2 && (prevP2.r !== p2Pos.r || prevP2.c !== p2Pos.c)) {
                 const targetLabel = `${cols[p2Pos.c]}${pythonState.n - p2Pos.r}`;
-                this.logs.push(`[${this.getLogTime()}] MOVIMIENTO MÁQUINA A ${targetLabel}`);
+                this.logs.push(`[${this.getLogTime()}] MOVIMIENTO ${p2LogName} A ${targetLabel}`);
                 
                 const prevCell = this.state.boardCells[`${p2Pos.r},${p2Pos.c}`];
                 let capture = null;
                 if (prevCell) {
                     capture = { type: prevCell.type, value: prevCell.value };
-                    if (prevCell.type === 'point') this.logs.push(`[${this.getLogTime()}] MÁQUINA CAPTURÓ +${prevCell.value} PUNTOS`);
-                    if (prevCell.type === 'energy') this.logs.push(`[${this.getLogTime()}] MÁQUINA RECARGÓ +${prevCell.value} ENERGÍA`);
+                    if (prevCell.type === 'point') this.logs.push(`[${this.getLogTime()}] ${p2LogName} CAPTURÓ +${prevCell.value} PUNTOS`);
+                    if (prevCell.type === 'energy') this.logs.push(`[${this.getLogTime()}] ${p2LogName} RECARGÓ +${prevCell.value} ENERGÍA`);
                 }
 
                 moveAnim = {
@@ -297,11 +347,11 @@ export default {
             const machinePointsDiff = (isPlayerWhite ? pythonState.knights.black.points : pythonState.knights.white.points) - this.state.machinePoints;
 
             if (playerPointsDiff === -3 && playerEnergyDiff === 0) {
-                this.logs.push(`[${this.getLogTime()}] JUGADOR PERDIÓ TURNO (FALTA DE ENERGÍA): -3 PUNTOS`);
+                this.logs.push(`[${this.getLogTime()}] ${p1LogName} PERDIÓ TURNO (FALTA DE ENERGÍA): -3 PUNTOS`);
                 AudioManager.playSFX('sfx_penalty');
             }
             if (machinePointsDiff === -3 && machineEnergyDiff === 0) {
-                this.logs.push(`[${this.getLogTime()}] MÁQUINA PERDIÓ TURNO (FALTA DE ENERGÍA): -3 PUNTOS`);
+                this.logs.push(`[${this.getLogTime()}] ${p2LogName} PERDIÓ TURNO (FALTA DE ENERGÍA): -3 PUNTOS`);
                 AudioManager.playSFX('sfx_penalty');
             }
         }
@@ -321,6 +371,7 @@ export default {
 
         this.state = {
             size: pythonState.n,
+            gameMode: mode,
             playerColor: playerColor,
             p1Pos: p1Pos,
             p2Pos: p2Pos,
@@ -464,9 +515,36 @@ export default {
             }
         }
 
+        const mode = this.state.gameMode || 'pvc';
+
+        let p1Name = 'JUGADOR';
+        let p1Sub = 'OPERADOR_01';
+        let p2Name = 'MÁQUINA';
+        let p2Sub = 'CPU_LOGIC [INT]';
+
+        if (mode === 'pvp') {
+            p1Name = 'JUGADOR 1';
+            p1Sub = 'OPERADOR_01';
+            p2Name = 'JUGADOR 2';
+            p2Sub = 'OPERADOR_02';
+        } else if (mode === 'cvc') {
+            p1Name = 'MÁQUINA 1';
+            p1Sub = 'CPU_LOGIC_01';
+            p2Name = 'MÁQUINA 2';
+            p2Sub = 'CPU_LOGIC_02';
+        }
+
         const isActivePlayer = this.state.currentTurn === 'player';
-        const turnOperatorLabel = isActivePlayer ? 'JUGADOR' : 'MÁQUINA';
-        const turnActionLabel = isActivePlayer ? 'Tu turno...' : 'Pensando movimiento...';
+        let turnOperatorLabel = isActivePlayer ? p1Name : p2Name;
+        
+        let turnActionLabel = '';
+        if (mode === 'pvp') {
+            turnActionLabel = 'Su turno...';
+        } else if (mode === 'cvc') {
+            turnActionLabel = 'Pensando movimiento...';
+        } else { // pvc
+            turnActionLabel = isActivePlayer ? 'Tu turno...' : 'Pensando movimiento...';
+        }
         
         let turnAvatarClass = '';
         if (isActivePlayer) {
@@ -494,8 +572,8 @@ export default {
                         <div class="operator-header">
                             <div class="operator-avatar ${playerAvatarClass}">♘</div>
                             <div class="operator-meta">
-                                <span class="operator-id uppercase font-bold">JUGADOR</span>
-                                <span class="operator-title text-secondary">OPERADOR_01</span>
+                                <span class="operator-id uppercase font-bold">${p1Name}</span>
+                                <span class="operator-title text-secondary">${p1Sub}</span>
                             </div>
                         </div>
                         <div class="operator-stats">
@@ -521,8 +599,8 @@ export default {
                         <div class="operator-header">
                             <div class="operator-avatar ${machineAvatarClass}">♘</div>
                             <div class="operator-meta">
-                                <span class="operator-id uppercase font-bold text-primary">MÁQUINA</span>
-                                <span class="operator-title text-secondary">CPU_LOGIC [INT]</span>
+                                <span class="operator-id uppercase font-bold text-primary">${p2Name}</span>
+                                <span class="operator-title text-secondary">${p2Sub}</span>
                             </div>
                         </div>
                         <div class="operator-stats">
@@ -642,6 +720,7 @@ export default {
         this.state = null;
 
         const config = window.gameState || {
+            gameMode: 'pvc',
             difficulty: 'normal',
             playerColor: 'black',
             boardSize: 8,
@@ -655,7 +734,8 @@ export default {
                 config.difficulty,
                 config.playerColor,
                 config.energies,
-                config.points
+                config.points,
+                config.gameMode
             )();
         } else {
             this.initLocalMockState();

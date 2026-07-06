@@ -1,5 +1,35 @@
 export default {
     render() {
+        const mode = window.gameMode || 'pvc';
+
+        let difficultyHTML = '';
+        if (mode !== 'pvp') {
+            difficultyHTML = `
+                <!-- Section 1: Difficulty Select (Required) -->
+                <div class="config-section">
+                    <div class="config-label uppercase font-bold tracking-wide">DIFICULTAD DE LA IA</div>
+                    <div class="tactical-chips-container">
+                        <button class="tactical-chip diff-select-chip" data-difficulty="facil">Fácil</button>
+                        <button class="tactical-chip diff-select-chip active" data-difficulty="normal">Normal</button>
+                        <button class="tactical-chip diff-select-chip" data-difficulty="dificil">Difícil</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        let colorLabel = 'COLOR DE TU CABALLO';
+        let opt1Text = 'BLANCAS (IA: Negras)';
+        let opt2Text = 'NEGRAS (IA: Blancas)';
+        if (mode === 'pvp') {
+            colorLabel = 'COLOR DEL JUGADOR 1';
+            opt1Text = 'BLANCAS (J2: Negras)';
+            opt2Text = 'NEGRAS (J2: Blancas)';
+        } else if (mode === 'cvc') {
+            colorLabel = 'COLOR DE LA MÁQUINA 1';
+            opt1Text = 'BLANCAS (M2: Negras)';
+            opt2Text = 'NEGRAS (M2: Blancas)';
+        }
+
         return `
             <div class="home-page">
                 <!-- Back Navigation Button on Top Left -->
@@ -28,22 +58,14 @@ export default {
                 <!-- Configuration Menu Container -->
                 <div class="home-menu-box config-container-box">
                     
-                    <!-- Section 1: Difficulty Select (Required) -->
-                    <div class="config-section">
-                        <div class="config-label uppercase font-bold tracking-wide">DIFICULTAD DE LA IA</div>
-                        <div class="tactical-chips-container">
-                            <button class="tactical-chip diff-select-chip" data-difficulty="facil">Fácil</button>
-                            <button class="tactical-chip diff-select-chip active" data-difficulty="normal">Normal</button>
-                            <button class="tactical-chip diff-select-chip" data-difficulty="dificil">Difícil</button>
-                        </div>
-                    </div>
+                    ${difficultyHTML}
 
                     <!-- Section: Horse Color Select -->
                     <div class="config-section">
-                        <div class="config-label uppercase font-bold tracking-wide">COLOR DE TU CABALLO</div>
+                        <div class="config-label uppercase font-bold tracking-wide">${colorLabel}</div>
                         <div class="tactical-chips-container">
-                            <button class="tactical-chip color-select-chip" data-color="white">BLANCAS (IA: Negras)</button>
-                            <button class="tactical-chip color-select-chip active" data-color="black">NEGRAS (IA: Blancas)</button>
+                            <button class="tactical-chip color-select-chip" data-color="white">${opt1Text}</button>
+                            <button class="tactical-chip color-select-chip active" data-color="black">${opt2Text}</button>
                         </div>
                     </div>
 
@@ -194,12 +216,13 @@ export default {
                 // Read configuration values (to be passed to python later)
                 const energyInput = document.getElementById('energy-array-input').value;
                 const pointsInput = document.getElementById('points-array-input').value;
-                
+
                 const energies = energyInput.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
                 const points = pointsInput.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
 
                 // Save config to shared state
                 window.gameState = {
+                    gameMode: window.gameMode || 'pvc',
                     difficulty: selectedDifficulty,
                     playerColor: selectedColor,
                     boardSize: boardSize,
@@ -208,7 +231,7 @@ export default {
                 };
 
                 console.log(`Iniciando juego con Dificultad: ${selectedDifficulty}, Color: ${selectedColor}, Tablero: ${boardSize}x${boardSize}, Energias: [${energies}], Puntos: [${points}]`);
-                
+
                 // Navigate to game board
                 navigate('/game');
             });

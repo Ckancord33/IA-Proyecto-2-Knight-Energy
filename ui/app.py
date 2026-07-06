@@ -42,9 +42,9 @@ def ping():
     return "pong"
 
 @eel.expose
-def start_game_backend(board_size, difficulty, player_color, energies, points):
+def start_game_backend(board_size, difficulty, player_color, energies, points, game_mode='pvc'):
     global current_controller
-    print(f"Backend: Starting game. Board size: {board_size}, Difficulty: {difficulty}, Player Color: {player_color}")
+    print(f"Backend: Starting game. Board size: {board_size}, Difficulty: {difficulty}, Player Color: {player_color}, Mode: {game_mode}")
     
     # 1. Generate layout from user arrays
     layout = generate_initial_layout(n=board_size, points_val=points, energies_val=energies)
@@ -53,12 +53,19 @@ def start_game_backend(board_size, difficulty, player_color, energies, points):
     state = State.new_game(layout, n=board_size, starting_energy=10)
     
     # 3. Determine white vs black types
-    if player_color == 'white':
+    if game_mode == 'pvp':
         white_player = 'human'
-        black_player = 'ai'
-    else:
-        white_player = 'ai'
         black_player = 'human'
+    elif game_mode == 'cvc':
+        white_player = 'ai'
+        black_player = 'ai'
+    else:  # pvc
+        if player_color == 'white':
+            white_player = 'human'
+            black_player = 'ai'
+        else:
+            white_player = 'ai'
+            black_player = 'human'
         
     # 4. Map difficulty to minimax depths
     depth = 3

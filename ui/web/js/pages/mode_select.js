@@ -64,7 +64,7 @@ export default {
             </div>
         `;
     },
-    
+
     init(navigate) {
         // Back Button to Menu
         const backBtn = document.getElementById('mode-back-btn');
@@ -73,11 +73,12 @@ export default {
                 navigate('/');
             });
         }
-        
-        // Mode Selection triggers - PVC redirects to Config, others directly to Game
+
+        // Mode Selection triggers - all modes redirect to Config first
         const pvcBtn = document.getElementById('mode-pvc-btn');
         if (pvcBtn) {
             pvcBtn.addEventListener('click', () => {
+                window.gameMode = 'pvc';
                 navigate('/config');
             });
         }
@@ -85,14 +86,16 @@ export default {
         const pvpBtn = document.getElementById('mode-pvp-btn');
         if (pvpBtn) {
             pvpBtn.addEventListener('click', () => {
-                navigate('/game');
+                window.gameMode = 'pvp';
+                navigate('/config');
             });
         }
 
         const cvcBtn = document.getElementById('mode-cvc-btn');
         if (cvcBtn) {
             cvcBtn.addEventListener('click', () => {
-                navigate('/game');
+                window.gameMode = 'cvc';
+                navigate('/config');
             });
         }
     }
