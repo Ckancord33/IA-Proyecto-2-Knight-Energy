@@ -16,10 +16,13 @@ def other_color(color: Color) -> Color:
 def legal_moves(state: State, color: Color) -> list[Position]:
     """
     Casillas en L disponibles para el caballo de `color`, dentro del
-    tablero. No filtra por energía: eso lo resuelve must_skip().
+    tablero, excluyendo la posición ocupada por el rival.
+    No filtra por energía: eso lo resuelve must_skip().
     """
     knight = state.knights[color]
-    return knight.get_candidate_moves(state.n)
+    opponent_knight = state.knights[other_color(color)]
+    candidates = knight.get_candidate_moves(state.n)
+    return [pos for pos in candidates if pos != opponent_knight.position]
 
 
 def must_skip(state: State, color: Color) -> bool:
