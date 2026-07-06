@@ -1,3 +1,5 @@
+import { AudioManager } from '../audio.js';
+
 export default {
     render() {
         return `
@@ -25,12 +27,6 @@ export default {
                             <span>INICIAR PROTOCOLO JUGAR</span>
                             <div class="btn-overlay"></div>
                         </button>
-                        
-                        <button class="tactical-btn" id="settings-btn">
-                            <span class="material-symbols-outlined">settings</span>
-                            <span>CONFIGURACIONES</span>
-                            <div class="btn-overlay"></div>
-                        </button>
                     </div>
                 </div>
             </div>
@@ -38,19 +34,17 @@ export default {
     },
     
     init(navigate) {
+        // Play title music when home page is initialized
+        AudioManager.playTitle();
+
         const playBtn = document.getElementById('play-btn');
-        const settingsBtn = document.getElementById('settings-btn');
         
         if (playBtn) {
             playBtn.addEventListener('click', () => {
+                AudioManager.fadeTitle(1500);
                 navigate('/mode');
             });
         }
         
-        if (settingsBtn) {
-            settingsBtn.addEventListener('click', () => {
-                navigate('/settings');
-            });
-        }
     }
 };
