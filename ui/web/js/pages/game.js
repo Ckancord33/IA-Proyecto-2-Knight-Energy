@@ -1,5 +1,3 @@
-import audioManager from '../audioManager.js';
-
 // Track current active page instance to allow global callbacks from Eel to resolve safely
 let activePageInstance = null;
 
@@ -124,7 +122,6 @@ export default {
         // Compile logs dynamically based on movement changes
         if (this.state) {
             const cols = ['A','B','C','D','E','F','G','H','I','J','K','L'];
-            let soundPlayed = false;
             
             // Check if player moved
             const prevP1 = this.state.p1Pos;
@@ -135,20 +132,8 @@ export default {
                 // Did player land on resource
                 const prevCell = this.state.boardCells[`${p1Pos.r},${p1Pos.c}`];
                 if (prevCell) {
-                    if (prevCell.type === 'point') {
-                        this.logs.push(`[${this.getLogTime()}] JUGADOR CAPTURÓ +${prevCell.value} PUNTOS`);
-                        audioManager.playSFX('sfx_point');
-                        soundPlayed = true;
-                    }
-                    if (prevCell.type === 'energy') {
-                        this.logs.push(`[${this.getLogTime()}] JUGADOR RECARGÓ +${prevCell.value} ENERGÍA`);
-                        audioManager.playSFX('sfx_energy');
-                        soundPlayed = true;
-                    }
-                }
-                if (!soundPlayed) {
-                    audioManager.playSFX('sfx_move');
-                    soundPlayed = true;
+                    if (prevCell.type === 'point') this.logs.push(`[${this.getLogTime()}] JUGADOR CAPTURÓ +${prevCell.value} PUNTOS`);
+                    if (prevCell.type === 'energy') this.logs.push(`[${this.getLogTime()}] JUGADOR RECARGÓ +${prevCell.value} ENERGÍA`);
                 }
             }
             
@@ -160,24 +145,8 @@ export default {
                 
                 const prevCell = this.state.boardCells[`${p2Pos.r},${p2Pos.c}`];
                 if (prevCell) {
-                    if (prevCell.type === 'point') {
-                        this.logs.push(`[${this.getLogTime()}] MÁQUINA CAPTURÓ +${prevCell.value} PUNTOS`);
-                        if (!soundPlayed) {
-                            audioManager.playSFX('sfx_point');
-                            soundPlayed = true;
-                        }
-                    }
-                    if (prevCell.type === 'energy') {
-                        this.logs.push(`[${this.getLogTime()}] MÁQUINA RECARGÓ +${prevCell.value} ENERGÍA`);
-                        if (!soundPlayed) {
-                            audioManager.playSFX('sfx_energy');
-                            soundPlayed = true;
-                        }
-                    }
-                }
-                if (!soundPlayed) {
-                    audioManager.playSFX('sfx_move');
-                    soundPlayed = true;
+                    if (prevCell.type === 'point') this.logs.push(`[${this.getLogTime()}] MÁQUINA CAPTURÓ +${prevCell.value} PUNTOS`);
+                    if (prevCell.type === 'energy') this.logs.push(`[${this.getLogTime()}] MÁQUINA RECARGÓ +${prevCell.value} ENERGÍA`);
                 }
             }
 
@@ -192,11 +161,9 @@ export default {
 
             if (playerPointsDiff === -3 && playerEnergyDiff === 0) {
                 this.logs.push(`[${this.getLogTime()}] JUGADOR PERDIÓ TURNO (FALTA DE ENERGÍA): -3 PUNTOS`);
-                audioManager.playSFX('sfx_penalty');
             }
             if (machinePointsDiff === -3 && machineEnergyDiff === 0) {
                 this.logs.push(`[${this.getLogTime()}] MÁQUINA PERDIÓ TURNO (FALTA DE ENERGÍA): -3 PUNTOS`);
-                audioManager.playSFX('sfx_penalty');
             }
         }
 
@@ -221,17 +188,14 @@ export default {
     },
 
     handleGameOver(winnerColor) {
-        const playerColor = this.state?.playerColor || window.gameState?.playerColor || 'black';
+        const playerColor = this.state?.playerColor || 'black';
         let msg = '';
         if (!winnerColor) {
             msg = '¡EL JUEGO TERMINÓ EN EMPATE!';
-            audioManager.playSFX('sfx_lose');
         } else if (winnerColor === playerColor) {
             msg = '¡VICTORIA! HAS GANADO LA PARTIDA';
-            audioManager.playSFX('sfx_win');
         } else {
             msg = '¡DERROTA! LA MÁQUINA HA GANADO LA PARTIDA';
-            audioManager.playSFX('sfx_lose');
         }
         
         this.logs.push(`[${this.getLogTime()}] ${msg}`);
@@ -493,9 +457,6 @@ export default {
         this.navigate = navigate;
         activePageInstance = this;
         
-        // Start game background music
-        audioManager.playBGM('bgm_game');
-        
         // Reset state so each entry does a clean startup
         this.state = null;
 
@@ -527,10 +488,6 @@ export default {
             cell.addEventListener('click', () => {
                 const r = parseInt(cell.getAttribute('data-r'));
                 const c = parseInt(cell.getAttribute('data-c'));
-                
-                // Play selection/move sound
-                audioManager.playSFX('sfx_select');
-                
                 if (window.eel) {
                     window.eel.play_human_move_backend(r, c)();
                 }
@@ -541,7 +498,6 @@ export default {
         const undoBtn = document.getElementById('game-undo-btn');
         if (undoBtn) {
             undoBtn.addEventListener('click', () => {
-                audioManager.playSFX('sfx_select');
                 if (window.eel) {
                     window.eel.undo_move_backend()();
                 }

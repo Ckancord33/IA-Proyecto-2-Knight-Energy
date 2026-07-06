@@ -1,5 +1,3 @@
-import audioManager from '../audioManager.js';
-
 export default {
     render() {
         return `
@@ -40,9 +38,6 @@ export default {
     },
     
     init(navigate) {
-        // Start menu background music
-        audioManager.playBGM('bgm_menu');
-
         const playBtn = document.getElementById('play-btn');
         const settingsBtn = document.getElementById('settings-btn');
         
