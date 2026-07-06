@@ -48,7 +48,7 @@ def main():
     
     controller = GameController(
         state, 
-        white_player_type='human', 
+        white_player_type='ai', 
         black_player_type='ai',
         white_depth=3,
         black_depth=3
@@ -59,7 +59,8 @@ def main():
         print_board(current_state)
         # Si es el turno de la IA y el juego no ha terminado, pausar para pedir Enter
         if controller.player_types[current_state.turn] == "ai" and not game.is_terminal(current_state):
-            input("\n[Turno de la IA] Presiona Enter para que la máquina realice su movimiento...")
+           # input("\n[Turno de la IA] Presiona Enter para que la máquina realice su movimiento...")
+           pass
 
     def on_game_over(winner):
         print_board(controller.state)
@@ -102,4 +103,4 @@ def main():
                 print("Entrada no válida. Introduce un número de la lista o 'u'.")
 
 if __name__ == "__main__":
-    main()
+    main()

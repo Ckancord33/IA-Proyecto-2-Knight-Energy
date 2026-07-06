@@ -1,4 +1,4 @@
-from ai.heuristic import funcion as heuristic
+from ai.heuristic import heuristic as heuristic
 from model.node import Node
 import model.game as game
 
@@ -46,7 +46,7 @@ def get_best_move(initial_state, max_depth):
                 child = Node(state, next_type, current_node.depth + 1, current_node)
                 stack.append(child)
         else:
-            current_node.utility = heuristic(current_node.state)
+            current_node.utility = heuristic(current_node.state,initial_state.turn)
             
     nodes_array.sort(key=lambda node: node.depth, reverse=True)
     
