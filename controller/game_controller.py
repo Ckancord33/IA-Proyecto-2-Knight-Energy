@@ -15,8 +15,8 @@ class GameController:
         state: State,
         white_player_type: str = "ai",  # "human" o "ai"
         black_player_type: str = "human",     # "human" o "ai"
-        white_depth: int = 3,
-        black_depth: int = 3,
+        white_depth: int = 4,
+        black_depth: int = 4,
         white_heuristic: str = "complex",
         black_heuristic: str = "complex",
         sleep_fn = None,

@@ -69,9 +69,9 @@ def start_game_backend(board_size, difficulty, player_color, energies, points, g
             black_player = 'human'
         
     # 4. Map difficulty to minimax depths
-    depth = 3
+    depth = 4
     if difficulty == 'facil':
-        depth = 1
+        depth = 2
     elif difficulty == 'dificil':
         depth = 6
         
@@ -130,8 +130,8 @@ def start_simulation_backend(n_matches, board_size, difficulty, energies, points
     def run_simulation():
         wins = {"white": 0, "black": 0, "draw": 0}
         
-        depth = 3
-        if difficulty == 'facil': depth = 1
+        depth = 4
+        if difficulty == 'facil': depth = 2
         elif difficulty == 'dificil': depth = 6
             
         for i in range(n_matches):
