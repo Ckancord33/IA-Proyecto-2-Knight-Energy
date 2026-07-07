@@ -42,15 +42,15 @@ def ping():
     return "pong"
 
 @eel.expose
-def start_game_backend(board_size, difficulty, player_color, energies, points, game_mode='pvc', white_heuristic='complex', black_heuristic='complex'):
+def start_game_backend(board_size, difficulty, player_color, energies, points, game_mode='pvc', starting_energy=7, white_heuristic='complex', black_heuristic='complex'):
     global current_controller
-    print(f"Backend: Starting game. Board size: {board_size}, Difficulty: {difficulty}, Player Color: {player_color}, Mode: {game_mode}, WhiteHeur: {white_heuristic}, BlackHeur: {black_heuristic}")
+    print(f"Backend: Starting game. Board size: {board_size}, Difficulty: {difficulty}, Player Color: {player_color}, Mode: {game_mode}, Starting Energy: {starting_energy}, WhiteHeur: {white_heuristic}, BlackHeur: {black_heuristic}")
     
     # 1. Generate layout from user arrays
     layout = generate_initial_layout(n=board_size, points_val=points, energies_val=energies)
     
-    # 2. Build initial state (starting energy set to 10)
-    state = State.new_game(layout, n=board_size, starting_energy=10)
+    # 2. Build initial state
+    state = State.new_game(layout, n=board_size, starting_energy=starting_energy)
     
     # 3. Determine white vs black types
     if game_mode == 'pvp':

@@ -144,6 +144,18 @@ export default {
                             </div>
                         </div>
 
+                        <!-- Starting Energy Input -->
+                        <div class="config-row-param">
+                            <div class="param-info-col">
+                                <span class="param-title">ENERGÍA INICIAL</span>
+                                <span class="param-subtitle">Cantidad de energía al inicio (mínimo 3)</span>
+                            </div>
+                            <div class="prompt-input-wrapper">
+                                <span class="prompt-arrow text-primary">&gt;</span>
+                                <input type="number" class="prompt-input" id="starting-energy-input" value="7" min="3">
+                            </div>
+                        </div>
+
                         <!-- Points Array Input -->
                         <div class="config-row-param">
                             <div class="param-info-col">
@@ -154,6 +166,14 @@ export default {
                                 <span class="prompt-arrow text-primary">&gt;</span>
                                 <input type="text" class="prompt-input" id="points-array-input" value="2, 3, 4, 5, 6, 8, 9" placeholder="Valores separados por comas">
                             </div>
+                        </div>
+
+                        <!-- Reset Defaults Button -->
+                        <div class="config-row-param" style="justify-content: center; margin-top: 10px; border-bottom: none;">
+                            <button class="tactical-btn secondary-btn" id="reset-defaults-btn" style="padding: 8px 16px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
+                                <span class="material-symbols-outlined" style="font-size: 1.1rem;">restart_alt</span>
+                                <span>RESTABLECER VALORES POR DEFECTO</span>
+                            </button>
                         </div>
 
                     </div>
@@ -280,6 +300,22 @@ export default {
             incBtn.addEventListener('click', () => updateSize(boardSize + 1));
         }
 
+        // Reset Defaults Event
+        const resetBtn = document.getElementById('reset-defaults-btn');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                const energyInput = document.getElementById('energy-array-input');
+                const startingEnergyInput = document.getElementById('starting-energy-input');
+                const pointsInput = document.getElementById('points-array-input');
+                
+                if (energyInput) energyInput.value = '2, 3, 4, 5';
+                if (startingEnergyInput) startingEnergyInput.value = '7';
+                if (pointsInput) pointsInput.value = '2, 3, 4, 5, 6, 8, 9';
+                
+                updateSize(8);
+            });
+        }
+
         // Start Match Button Event
         const startBtn = document.getElementById('start-match-btn');
         if (startBtn) {
@@ -287,9 +323,34 @@ export default {
                 // Read configuration values (to be passed to python later)
                 const energyInput = document.getElementById('energy-array-input').value;
                 const pointsInput = document.getElementById('points-array-input').value;
+                const startingEnergyInput = parseInt(document.getElementById('starting-energy-input')?.value || "7");
 
-                const energies = energyInput.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
-                const points = pointsInput.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
+                if (isNaN(startingEnergyInput) || startingEnergyInput < 3) {
+                    alert("La energía inicial debe ser un número válido mayor o igual a 3.");
+                    return;
+                }
+
+                const rawEnergies = energyInput.split(',').map(n => n.trim()).filter(n => n !== '');
+                if (rawEnergies.length === 0) {
+                    alert("La lista de valores de energía no puede estar vacía.");
+                    return;
+                }
+                const energies = rawEnergies.map(n => parseInt(n)).filter(n => !isNaN(n));
+                if (energies.length !== rawEnergies.length) {
+                    alert("La lista de valores de energía contiene valores inválidos. Solo se permiten números enteros separados por comas.");
+                    return;
+                }
+
+                const rawPoints = pointsInput.split(',').map(n => n.trim()).filter(n => n !== '');
+                if (rawPoints.length === 0) {
+                    alert("La lista de valores de puntos no puede estar vacía.");
+                    return;
+                }
+                const points = rawPoints.map(n => parseInt(n)).filter(n => !isNaN(n));
+                if (points.length !== rawPoints.length) {
+                    alert("La lista de valores de puntos contiene valores inválidos. Solo se permiten números enteros separados por comas.");
+                    return;
+                }
 
                 let whiteHeur = 'complex';
                 let blackHeur = 'complex';
@@ -311,8 +372,9 @@ export default {
                     difficulty: selectedDifficulty,
                     playerColor: selectedColor,
                     boardSize: boardSize,
-                    energies: energies.length > 0 ? energies : [2, 3, 4, 5],
-                    points: points.length > 0 ? points : [2, 3, 4, 5, 6, 8, 9],
+                    startingEnergy: startingEnergyInput,
+                    energies: energies,
+                    points: points,
                     whiteHeur: whiteHeur,
                     blackHeur: blackHeur
                 };

@@ -195,9 +195,9 @@ export default {
             p2Pos: { r: mid - 1, c: mid + 1 }, 
             currentTurn: 'player',
             playerPoints: 0,
-            playerEnergy: 10,
+            playerEnergy: config.startingEnergy || 7,
             machinePoints: 0,
-            machineEnergy: 10,
+            machineEnergy: config.startingEnergy || 7,
             maxEnergy: 15,
             boardCells: {},
             validMoves: []
@@ -234,9 +234,9 @@ export default {
             p2Pos: { r: mid - 1, c: mid + 1 },
             currentTurn: 'player',
             playerPoints: 0,
-            playerEnergy: 10,
+            playerEnergy: config.startingEnergy || 7,
             machinePoints: 0,
-            machineEnergy: 10,
+            machineEnergy: config.startingEnergy || 7,
             maxEnergy: 15,
             boardCells: {},
             validMoves: []
@@ -735,7 +735,10 @@ export default {
                 config.playerColor,
                 config.energies,
                 config.points,
-                config.gameMode
+                config.gameMode,
+                config.startingEnergy || 7,
+                config.whiteHeur || 'complex',
+                config.blackHeur || 'complex'
             )();
         } else {
             this.initLocalMockState();
