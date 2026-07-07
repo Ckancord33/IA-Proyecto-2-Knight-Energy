@@ -37,8 +37,8 @@ export default {
                 <div class="config-section">
                     <div class="config-label uppercase font-bold tracking-wide">HEURÍSTICA DE LA IA</div>
                     <div class="tactical-chips-container">
-                        <button class="tactical-chip heur-select-chip active" data-heur="complex">Compleja (Avanzada)</button>
-                        <button class="tactical-chip heur-select-chip" data-heur="simple">Simple (Básica)</button>
+                        <button class="tactical-chip heur-select-chip active" data-heur="complex">Compleja</button>
+                        <button class="tactical-chip heur-select-chip" data-heur="simple">Simple</button>
                     </div>
                 </div>
             `;
@@ -48,16 +48,16 @@ export default {
                 <div class="config-section">
                     <div class="config-label uppercase font-bold tracking-wide">HEURÍSTICA MÁQUINA 1 (W)</div>
                     <div class="tactical-chips-container">
-                        <button class="tactical-chip heur1-select-chip active" data-heur="complex">Compleja (Avanzada)</button>
-                        <button class="tactical-chip heur1-select-chip" data-heur="simple">Simple (Básica)</button>
+                        <button class="tactical-chip heur1-select-chip active" data-heur="complex">Compleja</button>
+                        <button class="tactical-chip heur1-select-chip" data-heur="simple">Simple</button>
                     </div>
                 </div>
                 <!-- Section: Heuristic Select for Machine 2 -->
                 <div class="config-section">
                     <div class="config-label uppercase font-bold tracking-wide">HEURÍSTICA MÁQUINA 2 (B)</div>
                     <div class="tactical-chips-container">
-                        <button class="tactical-chip heur2-select-chip active" data-heur="complex">Compleja (Avanzada)</button>
-                        <button class="tactical-chip heur2-select-chip" data-heur="simple">Simple (Básica)</button>
+                        <button class="tactical-chip heur2-select-chip active" data-heur="complex">Compleja</button>
+                        <button class="tactical-chip heur2-select-chip" data-heur="simple">Simple</button>
                     </div>
                 </div>
             `;
@@ -307,11 +307,11 @@ export default {
                 const energyInput = document.getElementById('energy-array-input');
                 const startingEnergyInput = document.getElementById('starting-energy-input');
                 const pointsInput = document.getElementById('points-array-input');
-                
+
                 if (energyInput) energyInput.value = '2, 3, 4, 5';
                 if (startingEnergyInput) startingEnergyInput.value = '7';
                 if (pointsInput) pointsInput.value = '2, 3, 4, 5, 6, 8, 9';
-                
+
                 updateSize(8);
             });
         }
