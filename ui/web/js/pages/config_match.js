@@ -63,6 +63,20 @@ export default {
             `;
         }
 
+        let simulationHTML = '';
+        if (mode === 'cvc') {
+            simulationHTML = `
+                <!-- Section: Simulation Count -->
+                <div class="config-section">
+                    <div class="config-label uppercase font-bold tracking-wide">CANTIDAD DE PARTIDAS (SIMULACIÓN)</div>
+                    <div class="prompt-input-wrapper" style="width: 100%; max-width: 200px; margin: 10px auto 0;">
+                        <span class="prompt-arrow text-primary">&gt;</span>
+                        <input type="number" class="prompt-input" id="simulation-count-input" value="1" min="1" max="1000">
+                    </div>
+                </div>
+            `;
+        }
+
         return `
             <div class="home-page">
                 <!-- Back Navigation Button on Top Left -->
@@ -103,6 +117,7 @@ export default {
                     </div>
 
                     ${heuristicHTML}
+                    ${simulationHTML}
 
                     <!-- Section 2: Parameters Toggle Button -->
                     <div class="config-section center-align">
@@ -362,8 +377,25 @@ export default {
                         whiteHeur = selectedHeur1;
                     }
                 } else if (mode === 'cvc') {
-                    whiteHeur = selectedHeur1;
-                    blackHeur = selectedHeur2;
+                    if (selectedColor === 'black') {
+                        blackHeur = selectedHeur1;
+                        whiteHeur = selectedHeur2;
+                    } else {
+                        whiteHeur = selectedHeur1;
+                        blackHeur = selectedHeur2;
+                    }
+                }
+
+                let simulationCount = 1;
+                if (mode === 'cvc') {
+                    const simInput = document.getElementById('simulation-count-input');
+                    if (simInput) {
+                        simulationCount = parseInt(simInput.value);
+                        if (isNaN(simulationCount) || simulationCount < 1) {
+                            alert("La cantidad de partidas debe ser un número válido mayor a 0.");
+                            return;
+                        }
+                    }
                 }
 
                 // Save config to shared state
@@ -376,13 +408,18 @@ export default {
                     energies: energies,
                     points: points,
                     whiteHeur: whiteHeur,
-                    blackHeur: blackHeur
+                    blackHeur: blackHeur,
+                    simulationCount: simulationCount
                 };
 
-                console.log(`Iniciando juego con Dificultad: ${selectedDifficulty}, Color: ${selectedColor}, Tablero: ${boardSize}x${boardSize}, Energias: [${energies}], Puntos: [${points}], WhiteHeur: ${whiteHeur}, BlackHeur: ${blackHeur}`);
+                console.log(`Iniciando juego con Dificultad: ${selectedDifficulty}, Color: ${selectedColor}, Tablero: ${boardSize}x${boardSize}, Energias: [${energies}], Puntos: [${points}], WhiteHeur: ${whiteHeur}, BlackHeur: ${blackHeur}, Sim: ${simulationCount}`);
 
-                // Navigate to game board
-                navigate('/game');
+                // Navigate to game board or simulation
+                if (simulationCount > 1) {
+                    navigate('/simulation');
+                } else {
+                    navigate('/game');
+                }
             });
         }
     }

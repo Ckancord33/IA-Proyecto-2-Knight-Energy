@@ -11,6 +11,7 @@ from controller.game_controller import GameController
 from model.state import State
 from model.board_generator import generate_initial_layout
 import model.game as game
+from ai.mini_max import get_best_move
 
 # Resolve absolute path to the 'web' directory in the same folder as this file
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -121,6 +122,49 @@ def undo_move_backend():
         print("Backend: Human requesting Undo")
         # Run asynchronously in background greenlet
         eel.spawn(current_controller.undo_move)
+
+@eel.expose
+def start_simulation_backend(n_matches, board_size, difficulty, energies, points, starting_energy=7, white_heuristic='complex', black_heuristic='complex'):
+    print(f"Backend: Starting simulation of {n_matches} matches. Diff: {difficulty}, WhiteHeur: {white_heuristic}, BlackHeur: {black_heuristic}")
+    
+    def run_simulation():
+        wins = {"white": 0, "black": 0, "draw": 0}
+        
+        depth = 3
+        if difficulty == 'facil': depth = 1
+        elif difficulty == 'dificil': depth = 6
+            
+        for i in range(n_matches):
+            layout = generate_initial_layout(n=board_size, points_val=points, energies_val=energies)
+            state = State.new_game(layout, n=board_size, starting_energy=starting_energy)
+            
+            # Bucle ininterrumpido sin interfaz gráfica ni delays
+            while not game.is_terminal(state):
+                current_color = state.turn
+                if game.must_skip(state, current_color):
+                    state = game.apply_skip(state)
+                    continue
+                    
+                h_type = white_heuristic if current_color == "white" else black_heuristic
+                best_move = get_best_move(state, depth, heuristic_type=h_type)
+                if best_move:
+                    state = game.apply_move(state, best_move)
+                else:
+                    break
+                    
+            w = game.winner(state)
+            if w == "white": wins["white"] += 1
+            elif w == "black": wins["black"] += 1
+            else: wins["draw"] += 1
+            
+            # Emitir progreso a la interfaz y ceder control al hilo principal de Eel
+            eel.update_simulation_progress_js(i + 1, n_matches)
+            eel.sleep(0.01)
+
+        # Enviar resultados finales
+        eel.simulation_finished_js(wins)
+
+    eel.spawn(run_simulation)
 
 def start_gui():
     print("Initializing Knight Energy GUI...")

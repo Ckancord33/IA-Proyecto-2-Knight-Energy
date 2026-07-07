@@ -3,13 +3,15 @@ import Instructions from './pages/instructions.js';
 import Game from './pages/game.js';
 import ModeSelect from './pages/mode_select.js';
 import ConfigMatch from './pages/config_match.js';
+import Simulation from './pages/simulation.js';
 
 const routes = {
     '/': Home,
     '/instructions': Instructions,
     '/game': Game,
     '/mode': ModeSelect,
-    '/config': ConfigMatch
+    '/config': ConfigMatch,
+    '/simulation': Simulation
 };
 
 let container = null;
