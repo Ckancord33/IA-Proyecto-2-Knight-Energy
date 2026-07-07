@@ -44,6 +44,16 @@ def heuristica1(state, max_color: str) -> float:
     # determinar quien es el rival
     min_color = game.other_color(max_color)
 
+    # Condición de estado terminal
+    if game.is_terminal(state):
+        w = game.winner(state)
+        if w == max_color:
+            return float('inf')
+        elif w == min_color:
+            return -float('inf')
+        else:
+            return 0.0  # Empate
+
     # Extraer valores de cada jugador
     knight_max = state.knights[max_color]
     knight_min = state.knights[min_color]
@@ -63,8 +73,8 @@ def heuristica1(state, max_color: str) -> float:
     delta_M = M_MAX - M_MIN
     
     # Normalización
-    MAX_POINTS = 37
-    MAX_ENERGY = 20
+    MAX_POINTS = state.max_points
+    MAX_ENERGY = state.max_energy
     MAX_MOVES = 8
 
     delta_P_norm = delta_P / MAX_POINTS

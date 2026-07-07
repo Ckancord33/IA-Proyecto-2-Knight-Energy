@@ -25,6 +25,8 @@ class State:
     energies: dict[Position, int]
     knights: dict[Color, Knight]
     turn: Color
+    max_points: int = 37
+    max_energy: int = 20
 
     @classmethod
     def new_game(
@@ -41,12 +43,16 @@ class State:
             "white": Knight("white", layout.white_position, energy=starting_energy),
             "black": Knight("black", layout.black_position, energy=starting_energy),
         }
+        total_points = sum(layout.points.values())
+        total_energy = starting_energy + sum(layout.energies.values())
         return cls(
             n=n,
             points=dict(layout.points),
             energies=dict(layout.energies),
             knights=knights,
             turn="white",  # la máquina siempre empieza y juega blancas
+            max_points=total_points,
+            max_energy=total_energy,
         )
 
     def clone(self) -> "State":
@@ -62,6 +68,8 @@ class State:
             energies=dict(self.energies),
             knights=cloned_knights,
             turn=self.turn,
+            max_points=self.max_points,
+            max_energy=self.max_energy,
         )
 
     def __repr__(self) -> str:
